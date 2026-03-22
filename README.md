@@ -29,15 +29,25 @@ Uma plataforma web para centralizar o registro de itens perdidos e encontrados n
 
 ### Diagrama de Casos de Uso
 ```mermaid
-usecaseDiagram
-    actor Estudante
-    actor Administrador
+flowchart LR
+    %% Atores
+    Estudante((Estudante))
+    Administrador((Administrador))
     
-    Estudante --> (Cadastrar Item Encontrado)
-    Estudante --> (Buscar Itens Perdidos)
-    Estudante --> (Enviar Mensagem)
-    Estudante --> (Marcar como Devolvido)
-    Estudante --> (Fazer Login)
+    %% Casos de Uso
+    Cadastrar([Cadastrar Item Encontrado])
+    Buscar([Buscar Itens Perdidos])
+    Mensagem([Enviar Mensagem])
+    Devolvido([Marcar como Devolvido])
+    Login([Fazer Login])
+    Excluir([Excluir Anúncios Inválidos])
     
-    Administrador --> (Fazer Login)
-    Administrador --> (Excluir Anúncios Inválidos)
+    %% Relações
+    Estudante --> Cadastrar
+    Estudante --> Buscar
+    Estudante --> Mensagem
+    Estudante --> Devolvido
+    Estudante --> Login
+    
+    Administrador --> Login
+    Administrador --> Excluir
