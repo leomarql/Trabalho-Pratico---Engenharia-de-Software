@@ -51,3 +51,34 @@ flowchart LR
     
     Administrador --> Login
     Administrador --> Excluir
+```
+### Diagrama de Classes
+```mermaid
+    classDiagram
+        class Usuario {
+            +int id
+            +String nome
+            +String email
+            +String senha
+            +login()
+            +enviarMensagem()
+        }
+        class Item {
+            +int id
+            +String titulo
+            +String descricao
+            +String categoria
+            +String localEncontrado
+            +Date dataRegistro
+            +String status
+            +marcarDevolvido()
+        }
+        class Mensagem {
+            +int id
+            +String conteudo
+            +Date dataEnvio
+        }
+        Usuario "1" -- "*" Item : cadastra
+        Usuario "1" -- "*" Mensagem : envia/recebe
+        Item "1" -- "*" Mensagem : referente a
+```
