@@ -1,4 +1,9 @@
 from fastapi import FastAPI
+import models
+from database import engine
+
+# Comando mágico que lê o models.py e cria as tabelas no banco SQLite
+models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
