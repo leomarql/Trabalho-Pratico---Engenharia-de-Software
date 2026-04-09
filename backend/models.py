@@ -8,4 +8,4 @@ class Usuario(Base):
     nome = Column(String, index=True)
     email = Column(String, unique=True, index=True)
     senha = Column(String)
-    is_admin = Column(Boolean, default=False) # Necessário para a História 6!
+    is_admin = Column(Boolean, default=False) # Necessário para a História 6
