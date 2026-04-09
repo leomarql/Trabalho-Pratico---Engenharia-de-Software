@@ -4,7 +4,6 @@
 * Leonardo Martins Marques Oliveira - Papel: Fullstack
 * Yuri Henriques Batista - Papel: Fullstack
 * Gustavo Eulalio de Souza Ferreira - Papel: Fullstack
-* Isabella Araujo Pinto Carvalho - Papel: Fullstack
 
 ## Objetivo do Sistema
 Uma plataforma web para centralizar o registro de itens perdidos e encontrados no campus da UFMG. O sistema permitirá que estudantes reportem objetos que perderam ou anunciem itens que encontraram, categorizando-os por local, data e tipo. O objetivo é facilitar a devolução rápida de pertences através de um mural público pesquisável e um sistema de contato direto entre os usuários.
