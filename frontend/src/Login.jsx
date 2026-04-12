@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import axios from 'axios';
 
-function Login() {
+function Login({ onLoginSucesso }) {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [mensagem, setMensagem] = useState('');
@@ -18,6 +18,9 @@ function Login() {
       
       // Se der certo (Código 200)
       setMensagem(`✅ ${resposta.data.mensagem} Bem-vindo, ${resposta.data.nome}!`);
+
+      // Avisa ao App que o login deu certo e manda os dados do usuário (id, nome, is_admin)
+      onLoginSucesso(resposta.data);
     } catch (erro) {
       // Se der erro (Código 401 - Senha incorreta)
       if (erro.response) {
