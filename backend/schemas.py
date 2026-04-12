@@ -25,3 +25,8 @@ class UsuarioResponse(BaseModel):
     # Isso avisa o Pydantic para ler os dados do SQLAlchemy sem dar erro
     class Config:
         from_attributes = True
+
+# 3. Schema para os dados que o usuário envia ao tentar logar
+class UsuarioLogin(BaseModel):
+    email: str
+    senha: str

@@ -42,3 +42,22 @@ def criar_usuario(usuario: schemas.UsuarioCreate, db: Session = Depends(get_db))
     db.refresh(novo_usuario)
 
     return novo_usuario
+
+# Rota de login do Usuário
+@app.post("/login")
+def login(usuario: schemas.UsuarioLogin, db: Session = Depends(get_db)):
+    # 1. Busca o usuário pelo e-mail
+    db_usuario = db.query(models.Usuario).filter(models.Usuario.email == usuario.email).first()
+    
+    # 2. Se o usuário não existe, nega o acesso
+    if not db_usuario:
+        raise HTTPException(status_code=401, detail="E-mail ou senha incorretos.")
+
+    # 3. Usa a função do security.py para comparar a senha digitada com o hash do banco
+    senha_valida = security.verify_password(usuario.senha, db_usuario.senha)
+    
+    if not senha_valida:
+        raise HTTPException(status_code=401, detail="E-mail ou senha incorretos.")
+
+    # 4. Se tudo deu certo, retorna sucesso (mais tarde trocaremos isso por um Token JWT)
+    return {"mensagem": "Login realizado com sucesso!", "nome": db_usuario.nome}
