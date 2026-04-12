@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi.middleware.cors import CORSMiddleware # Para configurar o CORS e liberar o React
 from sqlalchemy.orm import Session
 
 # Importando nossos arquivos
@@ -11,6 +12,15 @@ from database import engine, get_db
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
+
+# --- CONFIGURAÇÃO DE CORS (Liberando o React) ---
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"], # Permite o endereço do frontend
+    allow_credentials=True,
+    allow_methods=["*"], # Permite todos os métodos (POST, GET, OPTIONS)
+    allow_headers=["*"], # Permite todos os cabeçalhos
+)
 
 @app.get("/")
 def read_root():
