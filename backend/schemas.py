@@ -30,3 +30,25 @@ class UsuarioResponse(BaseModel):
 class UsuarioLogin(BaseModel):
     email: str
     senha: str
+
+# --- SCHEMAS PARA ANÚNCIOS (ITENS) ---
+class ItemCreate(BaseModel):
+    titulo: str
+    descricao: str
+    categoria: str
+    local_encontrado: str
+    dono_id: int # ID do usuário que está criando o anúncio
+
+# Schema de resposta (o que a API devolve para o Frontend)
+class ItemResponse(BaseModel):
+    id: int
+    titulo: str
+    descricao: str
+    categoria: str
+    local_encontrado: str
+    status: str
+    dono_id: int
+
+    # Essa configuração avisa ao Pydantic para "traduzir" os dados do SQLAlchemy
+    class Config:
+        from_attributes = True

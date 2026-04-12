@@ -69,5 +69,72 @@ def login(usuario: schemas.UsuarioLogin, db: Session = Depends(get_db)):
     if not senha_valida:
         raise HTTPException(status_code=401, detail="E-mail ou senha incorretos.")
 
-    # 4. Se tudo deu certo, retorna sucesso (mais tarde trocaremos isso por um Token JWT)
-    return {"mensagem": "Login realizado com sucesso!", "nome": db_usuario.nome}
+    # 4. Se tudo deu certo, retorna sucesso com os dados de permissão
+    return {
+        "mensagem": "Login realizado com sucesso!", 
+        "nome": db_usuario.nome,
+        "id": db_usuario.id,           # Adicionado
+        "is_admin": db_usuario.is_admin # Adicionado
+    }
+
+# --- ROTA PARA CRIAR UM ANÚNCIO (ITEM) ---
+@app.post("/itens", response_model=schemas.ItemResponse, status_code=status.HTTP_201_CREATED)
+def criar_item(item: schemas.ItemCreate, db: Session = Depends(get_db)):
+    
+    # Monta o objeto do banco de dados com as informações que vieram do Pydantic
+    novo_item = models.Item(
+        titulo=item.titulo,
+        descricao=item.descricao,
+        categoria=item.categoria,
+        local_encontrado=item.local_encontrado,
+        dono_id=item.dono_id
+    )
+
+    # Salva no banco de dados
+    db.add(novo_item)
+    db.commit()
+    db.refresh(novo_item)
+
+    return novo_item
+
+# --- ROTA PARA EXCLUIR ANÚNCIO (DONO OU ADMIN) ---
+@app.delete("/itens/{item_id}", status_code=status.HTTP_200_OK)
+def excluir_item(item_id: int, usuario_id: int, db: Session = Depends(get_db)):
+    
+    # 1. Busca quem é o usuário que apertou o botão de excluir
+    usuario = db.query(models.Usuario).filter(models.Usuario.id == usuario_id).first()
+    if not usuario:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado.")
+
+    # 2. Busca o anúncio PRIMEIRO (para sabermos quem é o dono dele)
+    item = db.query(models.Item).filter(models.Item.id == item_id).first()
+    if not item:
+        raise HTTPException(status_code=404, detail="Anúncio não encontrado.")
+
+    # 3. A NOVA REGRA DE NEGÓCIO: Ele NÃO é admin E também NÃO é o dono? Bloqueia!
+    if not usuario.is_admin and item.dono_id != usuario.id:
+        raise HTTPException(status_code=403, detail="Acesso negado. Você só pode excluir seus próprios anúncios.")
+
+    # 4. Executa a exclusão no banco de dados
+    db.delete(item)
+    db.commit()
+
+    return {"mensagem": f"Anúncio '{item.titulo}' excluído com sucesso."}
+
+# --- ROTA SECRETA (TEMPORÁRIA) PARA PROMOVER USUÁRIO ---
+@app.patch("/usuarios/{usuario_id}/promover")
+def promover_para_admin(usuario_id: int, db: Session = Depends(get_db)):
+    usuario = db.query(models.Usuario).filter(models.Usuario.id == usuario_id).first()
+    if not usuario:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado.")
+    
+    usuario.is_admin = True # Muda o status no banco
+    db.commit()
+    
+    return {"mensagem": f"O usuário {usuario.nome} agora é um ADMINISTRADOR!"}
+
+# --- ROTA PARA LISTAR TODOS OS ANÚNCIOS (O MURAL) ---
+@app.get("/itens", response_model=list[schemas.ItemResponse])
+def listar_itens(db: Session = Depends(get_db)):
+    itens = db.query(models.Item).all()
+    return itens
