@@ -19,6 +19,7 @@ class Item(Base):
     categoria = Column(String) # Ex: "Eletrônicos", "Documentos", "Roupas"
     local_encontrado = Column(String)
     status = Column(String, default="ativo") # Pode ser "ativo", "devolvido" ou "removido"
+    imagem_url = Column(String, nullable=True) # Campo para a foto do item
     
     # Isso cria a relação com a tabela de usuários (quem postou o anúncio)
     dono_id = Column(Integer, ForeignKey("usuarios.id"))
