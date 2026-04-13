@@ -37,6 +37,7 @@ class ItemCreate(BaseModel):
     descricao: str
     categoria: str
     local_encontrado: str
+    imagem_url: Optional[str] = None # Link da foto enviado pelo usuário
     dono_id: int # ID do usuário que está criando o anúncio
 
 # Schema de resposta (o que a API devolve para o Frontend)
@@ -47,6 +48,7 @@ class ItemResponse(BaseModel):
     categoria: str
     local_encontrado: str
     status: str
+    imagem_url: Optional[str] = None # Link da foto devolvido para o mural
     dono_id: int
 
     # Essa configuração avisa ao Pydantic para "traduzir" os dados do SQLAlchemy

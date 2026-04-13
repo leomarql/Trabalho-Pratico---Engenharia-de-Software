@@ -1,6 +1,9 @@
-from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi import FastAPI, Depends, HTTPException, status, File, UploadFile, Form
 from fastapi.middleware.cors import CORSMiddleware # Para configurar o CORS e liberar o React
+from fastapi.staticfiles import StaticFiles # Para servir arquivos de imagem
 from sqlalchemy.orm import Session
+import shutil
+import os
 
 # Importando nossos arquivos
 import models
@@ -11,7 +14,16 @@ from database import engine, get_db
 # Cria as tabelas no banco de dados automaticamente
 models.Base.metadata.create_all(bind=engine)
 
+# Garante que a pasta de uploads exista fisicamente no servidor
+UPLOAD_DIR = "uploads"
+if not os.path.exists(UPLOAD_DIR):
+    os.makedirs(UPLOAD_DIR)
+
 app = FastAPI()
+
+# Configura o FastAPI para "servir" a pasta uploads no endereço /uploads
+# Isso permite que o React acesse http://localhost:8000/uploads/foto.jpg
+app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
 
 # --- CONFIGURAÇÃO DE CORS (Liberando o React) ---
 app.add_middleware(
@@ -77,17 +89,33 @@ def login(usuario: schemas.UsuarioLogin, db: Session = Depends(get_db)):
         "is_admin": db_usuario.is_admin # Adicionado
     }
 
-# --- ROTA PARA CRIAR UM ANÚNCIO (ITEM) ---
+# --- ROTA PARA CRIAR UM ANÚNCIO (ITEM) COM UPLOAD DE IMAGEM ---
 @app.post("/itens", response_model=schemas.ItemResponse, status_code=status.HTTP_201_CREATED)
-def criar_item(item: schemas.ItemCreate, db: Session = Depends(get_db)):
+async def criar_item(
+    titulo: str = Form(...),
+    descricao: str = Form(...),
+    categoria: str = Form(...),
+    local_encontrado: str = Form(...),
+    dono_id: int = Form(...),
+    imagem: UploadFile = File(None), # Campo opcional para o arquivo de foto
+    db: Session = Depends(get_db)
+):
+    caminho_imagem = None
+
+    # Se o usuário enviou uma imagem, nós salvamos ela na pasta /uploads
+    if imagem:
+        caminho_imagem = f"{UPLOAD_DIR}/{imagem.filename}"
+        with open(caminho_imagem, "wb") as buffer:
+            shutil.copyfileobj(imagem.file, buffer)
     
-    # Monta o objeto do banco de dados com as informações que vieram do Pydantic
+    # Monta o objeto do banco de dados com as informações recebidas
     novo_item = models.Item(
-        titulo=item.titulo,
-        descricao=item.descricao,
-        categoria=item.categoria,
-        local_encontrado=item.local_encontrado,
-        dono_id=item.dono_id
+        titulo=titulo,
+        descricao=descricao,
+        categoria=categoria,
+        local_encontrado=local_encontrado,
+        imagem_url=caminho_imagem, # Salva o caminho do arquivo físico (ex: uploads/foto.jpg)
+        dono_id=dono_id
     )
 
     # Salva no banco de dados
@@ -121,6 +149,25 @@ def excluir_item(item_id: int, usuario_id: int, db: Session = Depends(get_db)):
 
     return {"mensagem": f"Anúncio '{item.titulo}' excluído com sucesso."}
 
+# --- ROTA PARA MARCAR COMO DEVOLVIDO (HISTÓRIA 4) ---
+@app.patch("/itens/{item_id}/devolver", status_code=status.HTTP_200_OK)
+def marcar_devolvido(item_id: int, usuario_id: int, db: Session = Depends(get_db)):
+    
+    # 1. Busca o item no banco
+    item = db.query(models.Item).filter(models.Item.id == item_id).first()
+    if not item:
+        raise HTTPException(status_code=404, detail="Anúncio não encontrado.")
+
+    # 2. Segurança: Somente o DONO do anúncio pode marcar como devolvido
+    if item.dono_id != usuario_id:
+        raise HTTPException(status_code=403, detail="Apenas o criador do anúncio pode marcá-lo como devolvido.")
+
+    # 3. Muda o status para sumir do mural (conforme a História 4)
+    item.status = "devolvido"
+    db.commit()
+
+    return {"mensagem": f"O item '{item.titulo}' agora está marcado como devolvido!"}
+
 # --- ROTA SECRETA (TEMPORÁRIA) PARA PROMOVER USUÁRIO ---
 @app.patch("/usuarios/{usuario_id}/promover")
 def promover_para_admin(usuario_id: int, db: Session = Depends(get_db)):
@@ -133,10 +180,14 @@ def promover_para_admin(usuario_id: int, db: Session = Depends(get_db)):
     
     return {"mensagem": f"O usuário {usuario.nome} agora é um ADMINISTRADOR!"}
 
-# --- ROTA PARA LISTAR OS 10 ÚLTIMOS ANÚNCIOS (US08) ---
+# --- ROTA PARA LISTAR OS 10 ÚLTIMOS ANÚNCIOS LIMITADOS AOS ITENS MARCADOS COMO ATIVOS ---
 @app.get("/itens", response_model=list[schemas.ItemResponse])
 def listar_itens(db: Session = Depends(get_db)):
-    # order_by(models.Item.id.desc()) -> Ordena do maior ID (mais novo) para o menor ID (mais velho)
-    # limit(10) -> Pega apenas os 10 primeiros resultados dessa lista invertida
-    itens = db.query(models.Item).order_by(models.Item.id.desc()).limit(10).all()
+    itens = (
+        db.query(models.Item)
+        .filter(models.Item.status == "ativo")
+        .order_by(models.Item.id.desc())
+        .limit(10)
+        .all()
+    )
     return itens
