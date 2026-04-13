@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import axios from 'axios';
 
-function Login({ onLoginSucesso }) {
+function Login({ onLoginSucesso, onIrParaCadastro }) {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [mensagem, setMensagem] = useState('');
@@ -60,6 +60,14 @@ function Login({ onLoginSucesso }) {
           Entrar
         </button>
       </form>
+
+      <button
+        type="button"
+        onClick={onIrParaCadastro}
+        style={{ marginTop: '16px', padding: '8px 12px', cursor: 'pointer', background: 'transparent', border: '1px solid #00529b', color: '#00529b' }}
+      >
+        Criar nova conta
+      </button>
 
       {/* Exibe a mensagem de sucesso ou erro aqui */}
       {mensagem && <p style={{ marginTop: '20px', fontWeight: 'bold' }}>{mensagem}</p>}
