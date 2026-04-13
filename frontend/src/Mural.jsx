@@ -45,7 +45,7 @@ function Mural({ usuario }) {
 
   return (
     <div style={{ padding: '20px', fontFamily: 'sans-serif' }}>
-      <h2>Mural de Achados e Perdidos</h2>
+      <h2>Últimos itens encontrados</h2>
       <p>Logado como: <strong>{usuario.nome}</strong> {usuario.is_admin ? '(👑 Admin)' : ''}</p>
       
       {/* Formulário de cadastro para a História 1 */}

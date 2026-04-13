@@ -180,9 +180,14 @@ def promover_para_admin(usuario_id: int, db: Session = Depends(get_db)):
     
     return {"mensagem": f"O usuário {usuario.nome} agora é um ADMINISTRADOR!"}
 
-# --- ROTA PARA LISTAR TODOS OS ANÚNCIOS (O MURAL) ---
+# --- ROTA PARA LISTAR OS 10 ÚLTIMOS ANÚNCIOS LIMITADOS AOS ITENS MARCADOS COMO ATIVOS ---
 @app.get("/itens", response_model=list[schemas.ItemResponse])
 def listar_itens(db: Session = Depends(get_db)):
-    # Agora mostramos apenas o que ainda está ATIVO
-    itens = db.query(models.Item).filter(models.Item.status == "ativo").all()
+    itens = (
+        db.query(models.Item)
+        .filter(models.Item.status == "ativo")
+        .order_by(models.Item.id.desc())
+        .limit(10)
+        .all()
+    )
     return itens
