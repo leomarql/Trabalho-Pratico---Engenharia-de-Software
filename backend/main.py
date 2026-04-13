@@ -133,8 +133,10 @@ def promover_para_admin(usuario_id: int, db: Session = Depends(get_db)):
     
     return {"mensagem": f"O usuário {usuario.nome} agora é um ADMINISTRADOR!"}
 
-# --- ROTA PARA LISTAR TODOS OS ANÚNCIOS (O MURAL) ---
+# --- ROTA PARA LISTAR OS 10 ÚLTIMOS ANÚNCIOS (US08) ---
 @app.get("/itens", response_model=list[schemas.ItemResponse])
 def listar_itens(db: Session = Depends(get_db)):
-    itens = db.query(models.Item).all()
+    # order_by(models.Item.id.desc()) -> Ordena do maior ID (mais novo) para o menor ID (mais velho)
+    # limit(10) -> Pega apenas os 10 primeiros resultados dessa lista invertida
+    itens = db.query(models.Item).order_by(models.Item.id.desc()).limit(10).all()
     return itens
