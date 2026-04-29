@@ -2,6 +2,7 @@ from fastapi import FastAPI, Depends, HTTPException, status, File, UploadFile, F
 from fastapi.middleware.cors import CORSMiddleware # Para configurar o CORS e liberar o React
 from fastapi.staticfiles import StaticFiles # Para servir arquivos de imagem
 from sqlalchemy.orm import Session
+from typing import Optional # Para marcar o campo de upload de imagem como opcional
 import shutil
 import os
 
@@ -180,14 +181,18 @@ def promover_para_admin(usuario_id: int, db: Session = Depends(get_db)):
     
     return {"mensagem": f"O usuário {usuario.nome} agora é um ADMINISTRADOR!"}
 
-# --- ROTA PARA LISTAR OS 10 ÚLTIMOS ANÚNCIOS LIMITADOS AOS ITENS MARCADOS COMO ATIVOS ---
+# --- ROTA PARA LISTAR E FILTRAR OS 10 ÚLTIMOS ANÚNCIOS (US08 + US02) ---
 @app.get("/itens", response_model=list[schemas.ItemResponse])
-def listar_itens(db: Session = Depends(get_db)):
-    itens = (
-        db.query(models.Item)
-        .filter(models.Item.status == "ativo")
-        .order_by(models.Item.id.desc())
-        .limit(10)
-        .all()
-    )
+def listar_itens(categoria: Optional[str] = None, db: Session = Depends(get_db)):
+    
+    # Passo 1: Cria a "base" da busca (Apenas itens ativos)
+    query = db.query(models.Item).filter(models.Item.status == "ativo")
+    
+    # Passo 2: Se o frontend enviou uma categoria específica, adicionamos esse filtro na base
+    if categoria:
+        query = query.filter(models.Item.categoria == categoria)
+        
+    # Passo 3: Executa a busca no banco, ordenando do mais novo pro mais velho e limitando a 10
+    itens = query.order_by(models.Item.id.desc()).limit(10).all()
+    
     return itens
