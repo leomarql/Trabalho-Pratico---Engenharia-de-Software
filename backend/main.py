@@ -2,7 +2,7 @@ from fastapi import FastAPI, Depends, HTTPException, status, File, UploadFile, F
 from fastapi.middleware.cors import CORSMiddleware # Para configurar o CORS e liberar o React
 from fastapi.staticfiles import StaticFiles # Para servir arquivos de imagem
 from sqlalchemy.orm import Session
-from typing import Optional # Para marcar o campo de upload de imagem como opcional
+from typing import Optional # Para tornar o query param `categoria` opcional
 import shutil
 import os
 

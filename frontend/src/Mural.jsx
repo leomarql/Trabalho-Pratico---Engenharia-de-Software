@@ -1,6 +1,23 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import CadastroItem from './CadastroItem';
+
+const CATEGORIAS = [
+  { label: 'Todos', valor: '' },
+  { label: 'Eletrônicos', valor: 'Eletrônicos' },
+  { label: 'Documentos', valor: 'Documentos' },
+  { label: 'Roupas', valor: 'Roupas' },
+  { label: 'Outros', valor: 'Outros' },
+];
+
+const getBtnStyle = (ativo) => ({
+  padding: '8px 16px',
+  cursor: 'pointer',
+  backgroundColor: ativo ? '#00529b' : '#eee',
+  color: ativo ? 'white' : 'black',
+  border: 'none',
+  borderRadius: '4px',
+});
 
 // O componente Mural recebe os dados do usuário que acabou de logar
 function Mural({ usuario }) {
@@ -9,17 +26,17 @@ function Mural({ usuario }) {
   const [filtro, setFiltro] = useState("");
 
   // Função para buscar os itens do backend (História 2)
-  const carregarItens = async () => {
+  const carregarItens = useCallback(async () => {
     try {
-      // Se tiver um filtro escolhido, coloca na URL. Se não, busca tudo.
-      const url = filtro ? `http://127.0.0.1:8000/itens?categoria=${filtro}` : 'http://127.0.0.1:8000/itens';
-      
-      const resposta = await axios.get(url);
+      const resposta = await axios.get(
+        'http://127.0.0.1:8000/itens',
+        { params: filtro ? { categoria: filtro } : {} }
+      );
       setItens(resposta.data);
     } catch (erro) {
       console.error("Erro ao buscar itens", erro);
     }
-  };
+  }, [filtro]);
 
   // Função para marcar como devolvido (História 4)
   const marcarDevolvido = async (itemId) => {
@@ -35,7 +52,7 @@ function Mural({ usuario }) {
   // O useEffect faz a função carregarItens rodar automaticamente assim que a tela abre
   useEffect(() => {
     carregarItens();
-  }, [filtro]); // Recarrega toda vez que o filtro mudar
+  }, [carregarItens]); // carregarItens já depende de filtro via useCallback
 
   // Função que o botão vermelho vai chamar
   const deletarItem = async (itemId) => {
@@ -57,37 +74,17 @@ function Mural({ usuario }) {
       <CadastroItem usuario={usuario} onSucesso={carregarItens} />
       
       {/* Filtros de categoria para a História 2 */}
-      <div style={{ marginTop: '30px', marginBottom: '20px', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-        <button 
-          onClick={() => setFiltro("")} 
-          style={{ padding: '8px 16px', cursor: 'pointer', backgroundColor: filtro === "" ? '#00529b' : '#eee', color: filtro === "" ? 'white' : 'black', border: 'none', borderRadius: '4px' }}
-        >
-          Todos
-        </button>
-        <button 
-          onClick={() => setFiltro("Eletrônicos")} 
-          style={{ padding: '8px 16px', cursor: 'pointer', backgroundColor: filtro === "Eletrônicos" ? '#00529b' : '#eee', color: filtro === "Eletrônicos" ? 'white' : 'black', border: 'none', borderRadius: '4px' }}
-        >
-          Eletrônicos
-        </button>
-        <button 
-          onClick={() => setFiltro("Documentos")} 
-          style={{ padding: '8px 16px', cursor: 'pointer', backgroundColor: filtro === "Documentos" ? '#00529b' : '#eee', color: filtro === "Documentos" ? 'white' : 'black', border: 'none', borderRadius: '4px' }}
-        >
-          Documentos
-        </button>
-        <button 
-          onClick={() => setFiltro("Roupas")} 
-          style={{ padding: '8px 16px', cursor: 'pointer', backgroundColor: filtro === "Roupas" ? '#00529b' : '#eee', color: filtro === "Roupas" ? 'white' : 'black', border: 'none', borderRadius: '4px' }}
-        >
-          Roupas
-        </button>
-        <button 
-          onClick={() => setFiltro("Outros")} 
-          style={{ padding: '8px 16px', cursor: 'pointer', backgroundColor: filtro === "Outros" ? '#00529b' : '#eee', color: filtro === "Outros" ? 'white' : 'black', border: 'none', borderRadius: '4px' }}
-        >
-          Outros
-        </button>
+      <div aria-label="Filtros de categoria" style={{ marginTop: '30px', marginBottom: '20px', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+        {CATEGORIAS.map(({ label, valor }) => (
+          <button
+            key={label}
+            onClick={() => setFiltro(valor)}
+            aria-pressed={filtro === valor}
+            style={getBtnStyle(filtro === valor)}
+          >
+            {label}
+          </button>
+        ))}
       </div>
 
       <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap', marginTop: '20px' }}>
