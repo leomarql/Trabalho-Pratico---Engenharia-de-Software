@@ -1,20 +1,42 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import CadastroItem from './CadastroItem';
+
+const CATEGORIAS = [
+  { label: 'Todos', valor: '' },
+  { label: 'Eletrônicos', valor: 'Eletrônicos' },
+  { label: 'Documentos', valor: 'Documentos' },
+  { label: 'Roupas', valor: 'Roupas' },
+  { label: 'Outros', valor: 'Outros' },
+];
+
+const getBtnStyle = (ativo) => ({
+  padding: '8px 16px',
+  cursor: 'pointer',
+  backgroundColor: ativo ? '#00529b' : '#eee',
+  color: ativo ? 'white' : 'black',
+  border: 'none',
+  borderRadius: '4px',
+});
 
 // O componente Mural recebe os dados do usuário que acabou de logar
 function Mural({ usuario }) {
   const [itens, setItens] = useState([]);
+  // Começa vazio, o que significa que vai mostrar "Todos"
+  const [filtro, setFiltro] = useState("");
 
-  // Função para buscar os itens no backend
-  const carregarItens = async () => {
+  // Função para buscar os itens do backend (História 2)
+  const carregarItens = useCallback(async () => {
     try {
-      const resposta = await axios.get('http://127.0.0.1:8000/itens');
+      const resposta = await axios.get(
+        'http://127.0.0.1:8000/itens',
+        { params: filtro ? { categoria: filtro } : {} }
+      );
       setItens(resposta.data);
     } catch (erro) {
-      console.error("Erro ao carregar itens", erro);
+      console.error("Erro ao buscar itens", erro);
     }
-  };
+  }, [filtro]);
 
   // Função para marcar como devolvido (História 4)
   const marcarDevolvido = async (itemId) => {
@@ -30,7 +52,7 @@ function Mural({ usuario }) {
   // O useEffect faz a função carregarItens rodar automaticamente assim que a tela abre
   useEffect(() => {
     carregarItens();
-  }, []);
+  }, [carregarItens]); // carregarItens já depende de filtro via useCallback
 
   // Função que o botão vermelho vai chamar
   const deletarItem = async (itemId) => {
@@ -50,6 +72,20 @@ function Mural({ usuario }) {
       
       {/* Formulário de cadastro para a História 1 */}
       <CadastroItem usuario={usuario} onSucesso={carregarItens} />
+      
+      {/* Filtros de categoria para a História 2 */}
+      <div aria-label="Filtros de categoria" style={{ marginTop: '30px', marginBottom: '20px', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+        {CATEGORIAS.map(({ label, valor }) => (
+          <button
+            key={label}
+            onClick={() => setFiltro(valor)}
+            aria-pressed={filtro === valor}
+            style={getBtnStyle(filtro === valor)}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
 
       <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap', marginTop: '20px' }}>
         {itens.length === 0 ? <p>Nenhum item encontrado no momento.</p> : itens.map((item) => (
