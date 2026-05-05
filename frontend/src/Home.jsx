@@ -34,7 +34,6 @@ const slides = [
 function Home({ onComeçar }) {
   const [activeSlide, setActiveSlide] = useState(0);
 
-  // Efeito para o carrossel mudar automaticamente a cada 5 segundos
   useEffect(() => {
     const timer = setInterval(() => {
       setActiveSlide((prev) => (prev + 1) % slides.length);
@@ -43,11 +42,11 @@ function Home({ onComeçar }) {
   }, []);
 
   return (
-    <Box sx={{ bgcolor: 'background.default', minHeight: '80vh', pt: { xs: 4, md: 8 }, pb: 6 }}>
+    <Box sx={{ bgcolor: 'background.default', minHeight: '80vh', pt: { xs: 4, md: 8 }, pb: 6, textAlign: 'center' }}>
       <Container maxWidth="lg">
-        <Grid container spacing={6} alignItems="center">
-          {/* Lado Esquerdo: Texto de Impacto */}
-          <Grid item xs={12} md={6}>
+        <Grid container spacing={6} direction="column" alignItems="center">
+          {/* Texto de Impacto Centralizado */}
+          <Grid item xs={12} sx={{ width: '100%' }}>
             <Typography 
               variant="h2" 
               component="h1" 
@@ -61,26 +60,26 @@ function Home({ onComeçar }) {
             >
               Perdeu algo? <br />
               <span style={{ color: '#ffca28' }}>A gente te ajuda</span> <br />
-              a recuperar.
+              a recooperar.
             </Typography>
-            <Typography variant="h6" color="text.secondary" sx={{ mb: 4, fontWeight: 400 }}>
+            <Typography variant="h6" color="text.secondary" sx={{ mb: 4, fontWeight: 400, maxWidth: 700, mx: 'auto' }}>
               O Recoopere é a plataforma oficial de achados e perdidos para a comunidade acadêmica. 
               Conectamos quem encontrou com quem perdeu de forma rápida e segura.
             </Typography>
-            <Stack direction="row" spacing={2}>
+            <Box sx={{ display: 'flex', justifyContent: 'center' }}>
               <Button 
                 variant="contained" 
                 size="large" 
                 onClick={onComeçar}
-                sx={{ px: 4, py: 2, borderRadius: 3, fontSize: '1.1rem', fontWeight: 700 }}
+                sx={{ px: 6, py: 2, borderRadius: 3, fontSize: '1.2rem', fontWeight: 700 }}
               >
                 Começar agora
               </Button>
-            </Stack>
+            </Box>
           </Grid>
 
-          {/* Lado Direito: Carrossel de Informações */}
-          <Grid item xs={12} md={6}>
+          {/* Carrossel Centralizado */}
+          <Grid item xs={12} sx={{ width: '100%', maxWidth: 600 }}>
             <Box sx={{ minHeight: 400, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <Fade in={true} key={activeSlide} timeout={1000}>
                 <Paper 
@@ -88,11 +87,12 @@ function Home({ onComeçar }) {
                   sx={{ 
                     p: 6, 
                     borderRadius: 8, 
-                    bgcolor: 'white', 
+                    bgcolor: 'background.paper', 
                     textAlign: 'center',
                     boxShadow: '0px 20px 40px rgba(0,0,0,0.05)',
                     width: '100%',
-                    border: '1px solid #f0f0f0'
+                    border: '1px solid',
+                    borderColor: 'divider'
                   }}
                 >
                   <Box sx={{ mb: 3 }}>
@@ -105,7 +105,6 @@ function Home({ onComeçar }) {
                     {slides[activeSlide].descricao}
                   </Typography>
                   
-                  {/* Indicadores do Carrossel */}
                   <Stack direction="row" spacing={1} justifyContent="center" sx={{ mt: 4 }}>
                     {slides.map((_, index) => (
                       <Box 

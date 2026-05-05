@@ -123,6 +123,18 @@ def listar_itens(db: Session = Depends(get_db)):
         })
     return res
 
+@app.get("/itens-arquivados", response_model=list[schemas.ItemResponse])
+def listar_itens_arquivados(db: Session = Depends(get_db)):
+    itens = db.query(models.Item).filter(models.Item.status == "devolvido").order_by(models.Item.id.desc()).all()
+    res = []
+    for item in itens:
+        res.append({
+            **item.__dict__,
+            "total_reivindicacoes": len(item.reivindicacoes),
+            "reivindicacoes": []
+        })
+    return res
+
 @app.get("/itens/{item_id}", response_model=schemas.ItemResponse)
 def obter_item(item_id: int, db: Session = Depends(get_db)):
     item = db.query(models.Item).filter(models.Item.id == item_id).first()

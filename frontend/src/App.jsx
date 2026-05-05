@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { createTheme, ThemeProvider, CssBaseline, Dialog, DialogTitle, DialogContent, Box, Fab, Tooltip } from '@mui/material';
 import ChatIcon from '@mui/icons-material/Chat';
 import Login from './Login';
@@ -11,19 +11,7 @@ import MeusAnuncios from './MeusAnuncios';
 import ItemDetalhes from './ItemDetalhes';
 import ListaChats from './ListaChats';
 import Chat from './Chat';
-
-const theme = createTheme({
-  palette: {
-    primary: { main: '#00529b' },
-    secondary: { main: '#ffca28' },
-    background: { default: '#f4f7f9' },
-  },
-  shape: { borderRadius: 12 },
-  typography: {
-    fontFamily: '"Poppins", "Roboto", "Inter", sans-serif',
-    h4: { fontWeight: 700 },
-  },
-});
+import Arquivados from './Arquivados';
 
 function App() {
   const [usuarioLogado, setUsuarioLogado] = useState(null);
@@ -32,6 +20,25 @@ function App() {
   const [itemSelecionadoId, setItemSelecionadoId] = useState(null);
   const [listaChatsAberta, setListaChatsAberta] = useState(false);
   const [chatAtivo, setChatAtivo] = useState(null);
+  const [darkMode, setDarkMode] = useState(false);
+
+  // Configuração do Tema Dinâmico
+  const theme = useMemo(() => createTheme({
+    palette: {
+      mode: darkMode ? 'dark' : 'light',
+      primary: { main: '#00529b' },
+      secondary: { main: '#ffca28' },
+      background: {
+        default: darkMode ? '#121212' : '#f4f7f9',
+        paper: darkMode ? '#1e1e1e' : '#ffffff',
+      },
+    },
+    shape: { borderRadius: 12 },
+    typography: {
+      fontFamily: '"Poppins", "Roboto", "Inter", sans-serif',
+      h4: { fontWeight: 700 },
+    },
+  }), [darkMode]);
 
   const handleLogout = () => {
     setUsuarioLogado(null);
@@ -54,8 +61,11 @@ function App() {
         onIrParaPerfil={() => setView('perfil')}
         onIrParaHome={() => setView('home')}
         onIrParaMeusAnuncios={() => setView('meus-anuncios')}
+        onIrParaArquivados={() => setView('arquivados')}
         onIrParaLogin={() => { setView('home'); setTelaAuth('login'); }}
         onIrParaCadastro={() => { setView('home'); setTelaAuth('cadastro'); }}
+        darkMode={darkMode}
+        toggleDarkMode={() => setDarkMode(!darkMode)}
       />
 
       {!usuarioLogado && !telaAuth && <Home onComeçar={() => setTelaAuth('login')} />}
@@ -87,6 +97,7 @@ function App() {
               onVoltar={() => setView('mural')} 
             />
           )}
+          {view === 'arquivados' && <Arquivados usuario={usuarioLogado} />}
 
           <Tooltip title="Minhas Conversas">
             <Fab 

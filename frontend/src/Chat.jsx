@@ -60,7 +60,7 @@ function Chat({ item, usuario, destinatarioId, onVerItem }) {
   return (
     <Box sx={{ height: '500px', display: 'flex', flexDirection: 'column' }}>
       {/* TÍTULO E BOTÃO DE DETALHES */}
-      <Box sx={{ p: 2, borderBottom: '1px solid #eee', display: 'flex', justifyContent: 'space-between', alignItems: 'center', bgcolor: 'white' }}>
+      <Box sx={{ p: 2, borderBottom: '1px solid', borderColor: 'divider', display: 'flex', justifyContent: 'space-between', alignItems: 'center', bgcolor: 'background.paper' }}>
         <Box>
           <Typography variant="caption" sx={{ fontWeight: 800, color: 'primary.main', display: 'block', textTransform: 'uppercase' }}>
             Chat de Devolução
@@ -80,7 +80,7 @@ function Chat({ item, usuario, destinatarioId, onVerItem }) {
         </Button>
       </Box>
       
-      <Paper variant="outlined" sx={{ flexGrow: 1, p: 2, overflowY: 'auto', mb: 1, bgcolor: '#f5f5f5', borderRadius: 0, border: 'none' }}>
+      <Paper variant="outlined" sx={{ flexGrow: 1, p: 2, overflowY: 'auto', mb: 1, bgcolor: 'background.default', borderRadius: 0, border: 'none' }}>
         <Stack spacing={2}>
           {mensagens.map((msg) => (
             <Box 
@@ -97,7 +97,7 @@ function Chat({ item, usuario, destinatarioId, onVerItem }) {
                 <Paper 
                   sx={{ 
                     p: 1.5, 
-                    bgcolor: msg.remetente_id === usuario.id ? 'primary.main' : 'white',
+                    bgcolor: msg.remetente_id === usuario.id ? 'primary.main' : 'background.paper',
                     color: msg.remetente_id === usuario.id ? 'white' : 'text.primary',
                     borderRadius: msg.remetente_id === usuario.id ? '20px 20px 0 20px' : '20px 20px 20px 0',
                     boxShadow: '0px 2px 5px rgba(0,0,0,0.05)'
@@ -115,14 +115,14 @@ function Chat({ item, usuario, destinatarioId, onVerItem }) {
         </Stack>
       </Paper>
 
-      <Box component="form" onSubmit={enviarMensagem} sx={{ display: 'flex', gap: 1, p: 2, bgcolor: 'white' }}>
+      <Box component="form" onSubmit={enviarMensagem} sx={{ display: 'flex', gap: 1, p: 2, bgcolor: 'background.paper' }}>
         <TextField
           fullWidth
           size="small"
           placeholder="Escreva uma mensagem..."
           value={novaMensagem}
           onChange={(e) => setNovaMensagem(e.target.value)}
-          sx={{ '& .MuiOutlinedInput-root': { borderRadius: 6, bgcolor: 'white' } }}
+          sx={{ '& .MuiOutlinedInput-root': { borderRadius: 6, bgcolor: 'background.paper' } }}
         />
         <IconButton type="submit" color="primary" disabled={!novaMensagem.trim()} sx={{ bgcolor: 'primary.main', color: 'white', '&:hover': { bgcolor: 'primary.dark' }, '&.Mui-disabled': { bgcolor: '#ccc' } }}>
           <SendIcon fontSize="small" />

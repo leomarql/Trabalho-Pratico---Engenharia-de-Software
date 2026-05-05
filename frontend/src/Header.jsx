@@ -15,6 +15,9 @@ import { useState } from 'react';
 import LogoutIcon from '@mui/icons-material/Logout';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import ListAltIcon from '@mui/icons-material/ListAlt';
+import Brightness4Icon from '@mui/icons-material/Brightness4';
+import Brightness7Icon from '@mui/icons-material/Brightness7';
+import ArchiveIcon from '@mui/icons-material/Archive';
 
 function Header({ 
   usuario, 
@@ -24,7 +27,10 @@ function Header({
   onIrParaHome,
   onIrParaLogin,
   onIrParaCadastro,
-  onIrParaMeusAnuncios
+  onIrParaMeusAnuncios,
+  onIrParaArquivados,
+  darkMode,
+  toggleDarkMode
 }) {
   const [anchorEl, setAnchorEl] = useState(null);
 
@@ -37,7 +43,7 @@ function Header({
   };
 
   return (
-    <AppBar position="sticky" elevation={0} sx={{ bgcolor: 'white', color: 'primary.main', borderBottom: '1px solid #eee' }}>
+    <AppBar position="sticky" elevation={0} sx={{ bgcolor: darkMode ? 'background.paper' : 'white', color: 'primary.main', borderBottom: '1px solid', borderColor: 'divider' }}>
       <Container maxWidth="lg">
         <Toolbar sx={{ px: { xs: 0 } }}>
           {/* Logo e Nome do Sistema */}
@@ -57,14 +63,22 @@ function Header({
               sx={{ 
                 fontWeight: 800, 
                 letterSpacing: '-0.5px',
-                display: { xs: 'none', sm: 'block' } 
+                display: { xs: 'none', sm: 'block' },
+                color: 'primary.main'
               }}
             >
               Recoopere
             </Typography>
           </Box>
           
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            {/* TEMA DARK TOGGLE */}
+            <Tooltip title={darkMode ? "Ativar Luz" : "Ativar Noite"}>
+              <IconButton onClick={toggleDarkMode} color="inherit">
+                {darkMode ? <Brightness7Icon /> : <Brightness4Icon />}
+              </IconButton>
+            </Tooltip>
+
             {!usuario ? (
               <>
                 <Button color="inherit" onClick={onIrParaLogin} sx={{ fontWeight: 600 }}>
@@ -81,15 +95,10 @@ function Header({
               </>
             ) : (
               <>
-                <Tooltip title="Mural de Itens">
-                  <Button 
-                    startIcon={<DashboardIcon />} 
-                    color="inherit" 
-                    onClick={onIrParaMural}
-                    sx={{ fontWeight: 600 }}
-                  >
-                    Mural
-                  </Button>
+                <Tooltip title="Mural">
+                  <IconButton color="inherit" onClick={onIrParaMural}>
+                    <DashboardIcon />
+                  </IconButton>
                 </Tooltip>
 
                 <Button 
@@ -101,13 +110,12 @@ function Header({
                   Meus Anúncios
                 </Button>
 
-                <Box sx={{ display: 'flex', alignItems: 'center', ml: 2 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', ml: 1 }}>
                   <IconButton
-                    size="large"
                     onClick={handleMenu}
                     color="inherit"
                   >
-                    <Avatar sx={{ width: 36, height: 36, bgcolor: 'secondary.main', color: 'primary.main', fontWeight: 700 }}>
+                    <Avatar sx={{ width: 32, height: 32, bgcolor: 'secondary.main', color: 'primary.main', fontWeight: 700, fontSize: '0.9rem' }}>
                       {usuario.nome.charAt(0).toUpperCase()}
                     </Avatar>
                   </IconButton>
@@ -115,9 +123,15 @@ function Header({
                     anchorEl={anchorEl}
                     open={Boolean(anchorEl)}
                     onClose={handleClose}
+                    transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+                    anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
                   >
-                    <MenuItem onClick={() => { handleClose(); onIrParaPerfil(); }}>Meu Perfil</MenuItem>
+                    <MenuItem onClick={() => { handleClose(); onIrParaPerfil(); }}>Editar Perfil</MenuItem>
+                    <MenuItem onClick={() => { handleClose(); onIrParaArquivados(); }}>
+                      <ArchiveIcon sx={{ mr: 1, fontSize: 20 }} /> Itens Devolvidos
+                    </MenuItem>
                     <MenuItem onClick={() => { handleClose(); onIrParaMeusAnuncios(); }} sx={{ display: { md: 'none' } }}>Meus Anúncios</MenuItem>
+                    <Divider />
                     <MenuItem onClick={() => { handleClose(); onLogout(); }}>Sair</MenuItem>
                   </Menu>
                 </Box>
