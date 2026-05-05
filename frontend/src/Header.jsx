@@ -120,8 +120,11 @@ function Header({
                     onClick={handleMenu}
                     color="inherit"
                   >
-                    <Avatar sx={{ width: 32, height: 32, bgcolor: 'secondary.main', color: 'primary.main', fontWeight: 700, fontSize: '0.9rem' }}>
-                      {usuario?.nome ? usuario.nome.charAt(0).toUpperCase() : 'U'}
+                    <Avatar 
+                      src={usuario?.imagem_url ? `http://127.0.0.1:8000/${usuario.imagem_url}` : undefined}
+                      sx={{ width: 32, height: 32, bgcolor: 'secondary.main', color: 'primary.main', fontWeight: 700, fontSize: '0.9rem' }}
+                    >
+                      {!usuario?.imagem_url && (usuario?.nome ? usuario.nome.charAt(0).toUpperCase() : 'U')}
                     </Avatar>
                   </IconButton>
                   <Menu

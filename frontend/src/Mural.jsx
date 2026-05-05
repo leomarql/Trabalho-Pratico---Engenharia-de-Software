@@ -218,7 +218,7 @@ function Mural({ usuario, onVerDetalhes }) {
                 </CardActionArea>
 
                 <CardActions sx={{ px: 2, pb: 2 }}>
-                  {usuario.id !== item.dono_id && (
+                  {Number(usuario.id) !== Number(item.dono_id) && (
                     <Button 
                       size="small" 
                       color="warning" 
@@ -229,7 +229,7 @@ function Mural({ usuario, onVerDetalhes }) {
                       É MEU!
                     </Button>
                   )}
-                  {usuario.id === item.dono_id && (
+                  {Number(usuario.id) === Number(item.dono_id) && (
                     <Button 
                       size="small" 
                       color="success" 
@@ -243,7 +243,7 @@ function Mural({ usuario, onVerDetalhes }) {
                   )}
                   <Button size="small" onClick={() => onVerDetalhes(item.id)}>Detalhes</Button>
                   <Box sx={{ flexGrow: 1 }} />
-                  {(usuario.is_admin || usuario.id === item.dono_id) && (
+                  {(usuario.is_admin || Number(usuario.id) === Number(item.dono_id)) && (
                     <IconButton color="error" size="small" onClick={() => deletarItem(item.id)}>
                       <DeleteIcon fontSize="small" />
                     </IconButton>
