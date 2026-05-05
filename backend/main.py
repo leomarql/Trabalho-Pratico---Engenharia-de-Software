@@ -216,3 +216,44 @@ def listar_itens(db: Session = Depends(get_db)):
         .all()
     )
     return itens
+
+# --- ROTA PARA REIVINDICAR UM ITEM ---
+@app.patch("/itens/{item_id}/reivindicar", status_code=status.HTTP_200_OK)
+def reivindicar_item(item_id: int, usuario_id: int, db: Session = Depends(get_db)):
+    item = db.query(models.Item).filter(models.Item.id == item_id).first()
+    if not item:
+        raise HTTPException(status_code=404, detail="Item não encontrado.")
+    
+    if item.dono_id == usuario_id:
+        raise HTTPException(status_code=400, detail="Você não pode reivindicar seu próprio item.")
+    
+    if item.reclamante_id:
+        raise HTTPException(status_code=400, detail="Este item já foi reivindicado por outra pessoa.")
+
+    item.reclamante_id = usuario_id
+    db.commit()
+    return {"mensagem": "Item reivindicado com sucesso! Você já pode conversar com o anunciante."}
+
+# --- ROTAS DE CHAT ---
+@app.post("/mensagens", response_model=schemas.MensagemResponse)
+def enviar_mensagem(mensagem: schemas.MensagemCreate, remetente_id: int, db: Session = Depends(get_db)):
+    # Verifica se o item existe
+    item = db.query(models.Item).filter(models.Item.id == mensagem.item_id).first()
+    if not item:
+        raise HTTPException(status_code=404, detail="Item não encontrado.")
+
+    nova_msg = models.Mensagem(
+        conteudo=mensagem.conteudo,
+        item_id=mensagem.item_id,
+        remetente_id=remetente_id,
+        destinatario_id=mensagem.destinatario_id
+    )
+    db.add(nova_msg)
+    db.commit()
+    db.refresh(nova_msg)
+    return nova_msg
+
+@app.get("/mensagens/{item_id}", response_model=list[schemas.MensagemResponse])
+def listar_mensagens(item_id: int, db: Session = Depends(get_db)):
+    msgs = db.query(models.Mensagem).filter(models.Mensagem.item_id == item_id).order_by(models.Mensagem.data_envio.asc()).all()
+    return msgs

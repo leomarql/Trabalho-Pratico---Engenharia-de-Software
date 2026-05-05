@@ -1,4 +1,5 @@
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, DateTime
+from sqlalchemy.sql import func
 from database import Base
 
 class Usuario(Base):
@@ -23,3 +24,17 @@ class Item(Base):
     
     # Isso cria a relação com a tabela de usuários (quem postou o anúncio)
     dono_id = Column(Integer, ForeignKey("usuarios.id"))
+    # Novo campo: ID do usuário que reivindicou o item
+    reclamante_id = Column(Integer, ForeignKey("usuarios.id"), nullable=True)
+
+class Mensagem(Base):
+    __tablename__ = "mensagens"
+
+    id = Column(Integer, primary_key=True, index=True)
+    conteudo = Column(String)
+    data_envio = Column(DateTime(timezone=True), server_default=func.now())
+    
+    # Contexto: A mensagem pertence a um item específico
+    item_id = Column(Integer, ForeignKey("itens.id"))
+    remetente_id = Column(Integer, ForeignKey("usuarios.id"))
+    destinatario_id = Column(Integer, ForeignKey("usuarios.id"))

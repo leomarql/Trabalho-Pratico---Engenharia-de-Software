@@ -1,5 +1,6 @@
 from pydantic import BaseModel, field_validator
-from typing import Optional
+from typing import Optional, Any
+from datetime import datetime
 
 # 1. Schema de Entrada (O que o usuário envia no formulário de Cadastro)
 class UsuarioCreate(BaseModel):
@@ -63,7 +64,25 @@ class ItemResponse(BaseModel):
     status: str
     imagem_url: Optional[str] = None # Link da foto devolvido para o mural
     dono_id: int
+    reclamante_id: Optional[int] = None # ID de quem reivindicou
 
     # Essa configuração avisa ao Pydantic para "traduzir" os dados do SQLAlchemy
+    class Config:
+        from_attributes = True
+
+# --- SCHEMAS PARA O CHAT (MENSAGENS) ---
+class MensagemCreate(BaseModel):
+    conteudo: str
+    item_id: int
+    destinatario_id: int
+
+class MensagemResponse(BaseModel):
+    id: int
+    conteudo: str
+    data_envio: Any # Importante importar Any ou usar datetime
+    item_id: int
+    remetente_id: int
+    destinatario_id: int
+
     class Config:
         from_attributes = True

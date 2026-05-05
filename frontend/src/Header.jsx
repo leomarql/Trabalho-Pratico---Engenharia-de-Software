@@ -12,9 +12,9 @@ import {
   Container
 } from '@mui/material';
 import { useState } from 'react';
-import AccountCircle from '@mui/icons-material/AccountCircle';
 import LogoutIcon from '@mui/icons-material/Logout';
 import DashboardIcon from '@mui/icons-material/Dashboard';
+import ListAltIcon from '@mui/icons-material/ListAlt';
 
 function Header({ 
   usuario, 
@@ -23,7 +23,8 @@ function Header({
   onIrParaPerfil, 
   onIrParaHome,
   onIrParaLogin,
-  onIrParaCadastro 
+  onIrParaCadastro,
+  onIrParaMeusAnuncios
 }) {
   const [anchorEl, setAnchorEl] = useState(null);
 
@@ -65,7 +66,6 @@ function Header({
           
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             {!usuario ? (
-              // Botoes para Usuário NÃO Logado
               <>
                 <Button color="inherit" onClick={onIrParaLogin} sx={{ fontWeight: 600 }}>
                   Entrar
@@ -80,7 +80,6 @@ function Header({
                 </Button>
               </>
             ) : (
-              // Botoes para Usuário LOGADO
               <>
                 <Tooltip title="Mural de Itens">
                   <Button 
@@ -93,12 +92,18 @@ function Header({
                   </Button>
                 </Tooltip>
 
+                <Button 
+                  startIcon={<ListAltIcon />}
+                  color="inherit" 
+                  onClick={onIrParaMeusAnuncios}
+                  sx={{ fontWeight: 600, display: { xs: 'none', md: 'flex' } }}
+                >
+                  Meus Anúncios
+                </Button>
+
                 <Box sx={{ display: 'flex', alignItems: 'center', ml: 2 }}>
                   <IconButton
                     size="large"
-                    aria-label="account of current user"
-                    aria-controls="menu-appbar"
-                    aria-haspopup="true"
                     onClick={handleMenu}
                     color="inherit"
                   >
@@ -107,15 +112,12 @@ function Header({
                     </Avatar>
                   </IconButton>
                   <Menu
-                    id="menu-appbar"
                     anchorEl={anchorEl}
-                    anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-                    keepMounted
-                    transformOrigin={{ vertical: 'top', horizontal: 'right' }}
                     open={Boolean(anchorEl)}
                     onClose={handleClose}
                   >
                     <MenuItem onClick={() => { handleClose(); onIrParaPerfil(); }}>Meu Perfil</MenuItem>
+                    <MenuItem onClick={() => { handleClose(); onIrParaMeusAnuncios(); }} sx={{ display: { md: 'none' } }}>Meus Anúncios</MenuItem>
                     <MenuItem onClick={() => { handleClose(); onLogout(); }}>Sair</MenuItem>
                   </Menu>
                 </Box>
