@@ -19,27 +19,24 @@ import {
   Paper,
   TextField,
   InputAdornment,
-  MenuItem
+  MenuItem,
+  CardActionArea
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import AddIcon from '@mui/icons-material/Add';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import SearchIcon from '@mui/icons-material/Search';
 import FilterListIcon from '@mui/icons-material/FilterList';
-import ChatIcon from '@mui/icons-material/Chat';
 import PanToolIcon from '@mui/icons-material/PanTool';
 
 import CadastroItem from './CadastroItem';
-import Chat from './Chat';
 
-function Mural({ usuario }) {
+function Mural({ usuario, onVerDetalhes }) {
   const [itens, setItens] = useState([]);
   const [itensFiltrados, setItensFiltrados] = useState([]);
   const [busca, setBusca] = useState('');
   const [categoriaFiltro, setCategoriaFiltro] = useState('Todos');
   const [openDialog, setOpenDialog] = useState(false);
-  const [chatAberto, setChatAberto] = useState(null);
 
   const categorias = ['Todos', 'Eletrônicos', 'Documentos', 'Roupas', 'Outros'];
 
@@ -63,34 +60,13 @@ function Mural({ usuario }) {
     setItensFiltrados(filtrados);
   }, [busca, categoriaFiltro, itens]);
 
-  const reivindicarItem = async (itemId) => {
-    if (!window.confirm("Você acredita que este item é seu? Isso notificará o anunciante.")) return;
-    try {
-      await axios.patch(`http://127.0.0.1:8000/itens/${itemId}/reivindicar?usuario_id=${usuario.id}`);
-      alert("Item reivindicado! Agora você pode conversar com o anunciante.");
-      carregarItens();
-    } catch (erro) {
-      alert("Erro: " + (erro.response?.data?.detail || "Erro desconhecido"));
-    }
-  };
-
-  const marcarDevolvido = async (itemId) => {
-    if (!window.confirm("Deseja marcar este item como devolvido?")) return;
-    try {
-      await axios.patch(`http://127.0.0.1:8000/itens/${itemId}/devolver?usuario_id=${usuario.id}`);
-      carregarItens();
-    } catch (erro) {
-      alert("Erro: " + (erro.response?.data?.detail || "Erro desconhecido"));
-    }
-  };
-
   const deletarItem = async (itemId) => {
     if (!window.confirm("Tem certeza que deseja excluir este anúncio?")) return;
     try {
       await axios.delete(`http://127.0.0.1:8000/itens/${itemId}?usuario_id=${usuario.id}`);
       carregarItens();
     } catch (erro) {
-      alert("Erro: " + (erro.response?.data?.detail || "Erro desconhecido"));
+      alert("Erro ao excluir");
     }
   };
 
@@ -102,7 +78,7 @@ function Mural({ usuario }) {
     <Box sx={{ flexGrow: 1, bgcolor: 'background.default', pb: 8 }}>
       <Container maxWidth="lg">
         <Typography variant="h4" sx={{ mb: 4, fontWeight: '800', color: 'primary.main' }}>
-          Mural de Itens
+          Mural de Achados e Perdidos
         </Typography>
 
         <Paper sx={{ p: 2, mb: 4, borderRadius: 4, display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
@@ -125,9 +101,7 @@ function Mural({ usuario }) {
             value={categoriaFiltro}
             onChange={(e) => setCategoriaFiltro(e.target.value)}
             sx={{ minWidth: '150px' }}
-            InputProps={{
-              sx: { borderRadius: 3 }
-            }}
+            InputProps={{ sx: { borderRadius: 3 } }}
           >
             {categorias.map((cat) => (<MenuItem key={cat} value={cat}>{cat}</MenuItem>))}
           </TextField>
@@ -137,62 +111,40 @@ function Mural({ usuario }) {
           {itensFiltrados.map((item) => (
             <Grid item key={item.id} xs={12} sm={6} md={4}>
               <Card sx={{ height: '100%', borderRadius: 4, display: 'flex', flexDirection: 'column' }}>
-                <CardMedia
-                  component="img"
-                  height="220"
-                  image={item.imagem_url ? `http://127.0.0.1:8000/${item.imagem_url}` : 'https://via.placeholder.com/220'}
-                />
-                <CardContent sx={{ flexGrow: 1, p: 3 }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                    <Typography variant="h6" sx={{ fontWeight: '800' }}>{item.titulo}</Typography>
-                    <Chip label={item.categoria} size="small" color="primary" />
-                  </Box>
-                  <Typography variant="body2" color="text.secondary">{item.descricao}</Typography>
-                </CardContent>
+                <CardActionArea onClick={() => onVerDetalhes(item.id)}>
+                  <CardMedia
+                    component="img"
+                    height="200"
+                    image={item.imagem_url ? `http://127.0.0.1:8000/${item.imagem_url}` : 'https://via.placeholder.com/200'}
+                  />
+                  <CardContent sx={{ flexGrow: 1 }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                      <Typography variant="h6" sx={{ fontWeight: '800' }}>{item.titulo}</Typography>
+                      <Chip label={item.categoria} size="small" color="primary" />
+                    </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1, color: 'text.secondary' }}>
+                      <LocationOnIcon sx={{ fontSize: 16, mr: 0.5 }} />
+                      <Typography variant="caption">{item.local_encontrado}</Typography>
+                    </Box>
+                    <Typography variant="body2" color="text.secondary" sx={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                      {item.descricao}
+                    </Typography>
+                    
+                    <Box sx={{ mt: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <PanToolIcon sx={{ fontSize: 16, color: 'warning.main' }} />
+                      <Typography variant="caption" sx={{ fontWeight: 700 }}>
+                        {item.total_reivindicacoes} reivindicação(ões)
+                      </Typography>
+                    </Box>
+                  </CardContent>
+                </CardActionArea>
 
-                <CardActions sx={{ px: 3, pb: 3, pt: 0, gap: 1 }}>
-                  {/* Botão de Reivindicar (Para quem não é o dono) */}
-                  {usuario.id !== item.dono_id && !item.reclamante_id && (
-                    <Button 
-                      variant="contained" 
-                      color="warning" 
-                      startIcon={<PanToolIcon />}
-                      onClick={() => reivindicarItem(item.id)}
-                      sx={{ borderRadius: 2, fontWeight: 700 }}
-                    >
-                      É meu!
-                    </Button>
-                  )}
-
-                  {/* Botão de Chat (Para o reclamante) */}
-                  {item.reclamante_id === usuario.id && (
-                    <Button 
-                      variant="contained" 
-                      color="primary" 
-                      startIcon={<ChatIcon />}
-                      onClick={() => setChatAberto(item)}
-                      sx={{ borderRadius: 2 }}
-                    >
-                      Chat
-                    </Button>
-                  )}
-
-                  {/* Botões do Dono */}
-                  {usuario.id === item.dono_id && (
-                    <Button 
-                      variant="contained" 
-                      color="success" 
-                      onClick={() => marcarDevolvido(item.id)}
-                      sx={{ borderRadius: 2 }}
-                    >
-                      Devolvido
-                    </Button>
-                  )}
-
+                <CardActions sx={{ px: 2, pb: 2 }}>
+                  <Button size="small" onClick={() => onVerDetalhes(item.id)}>Ver Detalhes</Button>
                   <Box sx={{ flexGrow: 1 }} />
                   {(usuario.is_admin || usuario.id === item.dono_id) && (
-                    <IconButton color="error" onClick={() => deletarItem(item.id)}>
-                      <DeleteIcon />
+                    <IconButton color="error" size="small" onClick={() => deletarItem(item.id)}>
+                      <DeleteIcon fontSize="small" />
                     </IconButton>
                   )}
                 </CardActions>
@@ -202,22 +154,17 @@ function Mural({ usuario }) {
         </Grid>
       </Container>
 
-      <Fab color="secondary" sx={{ position: 'fixed', bottom: 32, right: 32 }} onClick={() => setOpenDialog(true)}>
+      <Fab 
+        color="secondary" 
+        sx={{ position: 'fixed', bottom: 32, right: 32 }} 
+        onClick={() => setOpenDialog(true)}
+      >
         <AddIcon />
       </Fab>
 
-      {/* Dialog de Cadastro */}
       <Dialog open={openDialog} onClose={() => setOpenDialog(false)} fullWidth maxWidth="sm">
         <DialogTitle sx={{ fontWeight: '800' }}>📢 Novo Anúncio</DialogTitle>
         <DialogContent><CadastroItem usuario={usuario} onSucesso={() => { carregarItens(); setOpenDialog(false); }} /></DialogContent>
-      </Dialog>
-
-      {/* Dialog do Chat no Mural */}
-      <Dialog open={Boolean(chatAberto)} onClose={() => setChatAberto(null)} fullWidth maxWidth="xs">
-        <DialogTitle sx={{ fontWeight: '800' }}>Chat com Anunciante</DialogTitle>
-        <DialogContent>
-          {chatAberto && <Chat item={chatAberto} usuario={usuario} destinatarioId={chatAberto.dono_id} />}
-        </DialogContent>
       </Dialog>
     </Box>
   );

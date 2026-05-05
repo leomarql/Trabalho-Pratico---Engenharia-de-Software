@@ -1,5 +1,5 @@
 from pydantic import BaseModel, field_validator
-from typing import Optional, Any
+from typing import Optional, Any, List
 from datetime import datetime
 
 # 1. Schema de Entrada (O que o usuário envia no formulário de Cadastro)
@@ -23,7 +23,6 @@ class UsuarioResponse(BaseModel):
     email: str
     is_admin: bool
 
-    # Isso avisa o Pydantic para ler os dados do SQLAlchemy sem dar erro
     class Config:
         from_attributes = True
 
@@ -45,16 +44,25 @@ class UsuarioUpdate(BaseModel):
             raise ValueError('O e-mail deve obrigatoriamente terminar com @ufmg.br')
         return v
 
+# --- SCHEMAS PARA REIVINDICAÇÕES ---
+class ReivindicacaoResponse(BaseModel):
+    id: int
+    item_id: int
+    usuario_id: int
+    data_reivindicacao: datetime
+    usuario_nome: Optional[str] = None # Nome do reclamante para facilitar o front
+
+    class Config:
+        from_attributes = True
+
 # --- SCHEMAS PARA ANÚNCIOS (ITENS) ---
 class ItemCreate(BaseModel):
     titulo: str
     descricao: str
     categoria: str
     local_encontrado: str
-    imagem_url: Optional[str] = None # Link da foto enviado pelo usuário
-    dono_id: int # ID do usuário que está criando o anúncio
+    dono_id: int
 
-# Schema de resposta (o que a API devolve para o Frontend)
 class ItemResponse(BaseModel):
     id: int
     titulo: str
@@ -62,11 +70,11 @@ class ItemResponse(BaseModel):
     categoria: str
     local_encontrado: str
     status: str
-    imagem_url: Optional[str] = None # Link da foto devolvido para o mural
+    imagem_url: Optional[str] = None
     dono_id: int
-    reclamante_id: Optional[int] = None # ID de quem reivindicou
+    total_reivindicacoes: int = 0
+    reivindicacoes: List[ReivindicacaoResponse] = []
 
-    # Essa configuração avisa ao Pydantic para "traduzir" os dados do SQLAlchemy
     class Config:
         from_attributes = True
 
@@ -79,10 +87,11 @@ class MensagemCreate(BaseModel):
 class MensagemResponse(BaseModel):
     id: int
     conteudo: str
-    data_envio: Any # Importante importar Any ou usar datetime
+    data_envio: datetime
     item_id: int
     remetente_id: int
     destinatario_id: int
+    remetente_nome: Optional[str] = None
 
     class Config:
         from_attributes = True

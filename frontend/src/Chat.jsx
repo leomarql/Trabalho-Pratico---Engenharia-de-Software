@@ -3,13 +3,11 @@ import axios from 'axios';
 import { 
   Box, 
   TextField, 
-  Button, 
   Typography, 
   Paper, 
   Stack, 
-  Avatar,
-  Divider,
-  IconButton
+  IconButton,
+  Avatar
 } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 
@@ -44,10 +42,9 @@ function Chat({ item, usuario, destinatarioId }) {
     }
   };
 
-  // Carrega mensagens e faz scroll para o fim
   useEffect(() => {
     carregarMensagens();
-    const interval = setInterval(carregarMensagens, 3000); // Polling simples a cada 3s
+    const interval = setInterval(carregarMensagens, 3000);
     return () => clearInterval(interval);
   }, [item.id]);
 
@@ -56,51 +53,58 @@ function Chat({ item, usuario, destinatarioId }) {
   }, [mensagens]);
 
   return (
-    <Box sx={{ height: '400px', display: 'flex', flexDirection: 'column' }}>
-      <Typography variant="subtitle2" sx={{ mb: 1, color: 'text.secondary' }}>
-        Conversando sobre: <b>{item.titulo}</b>
-      </Typography>
+    <Box sx={{ height: '450px', display: 'flex', flexDirection: 'column' }}>
+      <Box sx={{ p: 1, borderBottom: '1px solid #eee', mb: 1 }}>
+        <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>
+          {item.titulo}
+        </Typography>
+      </Box>
       
-      <Paper variant="outlined" sx={{ flexGrow: 1, p: 2, overflowY: 'auto', mb: 2, bgcolor: '#f9f9f9', borderRadius: 3 }}>
+      <Paper variant="outlined" sx={{ flexGrow: 1, p: 2, overflowY: 'auto', mb: 2, bgcolor: '#f5f5f5', borderRadius: 3, border: 'none' }}>
         <Stack spacing={2}>
           {mensagens.map((msg) => (
             <Box 
               key={msg.id} 
               sx={{ 
                 alignSelf: msg.remetente_id === usuario.id ? 'flex-end' : 'flex-start',
-                maxWidth: '80%'
+                maxWidth: '85%'
               }}
             >
-              <Paper 
-                sx={{ 
-                  p: 1.5, 
-                  bgcolor: msg.remetente_id === usuario.id ? 'primary.main' : 'white',
-                  color: msg.remetente_id === usuario.id ? 'white' : 'text.primary',
-                  borderRadius: msg.remetente_id === usuario.id ? '16px 16px 0 16px' : '16px 16px 16px 0',
-                  boxShadow: '0px 2px 4px rgba(0,0,0,0.05)'
-                }}
-              >
-                <Typography variant="body2">{msg.conteudo}</Typography>
-              </Paper>
-              <Typography variant="caption" sx={{ fontSize: '10px', display: 'block', mt: 0.5, textAlign: msg.remetente_id === usuario.id ? 'right' : 'left' }}>
-                {new Date(msg.data_envio).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-              </Typography>
+              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: msg.remetente_id === usuario.id ? 'flex-end' : 'flex-start' }}>
+                <Typography variant="caption" sx={{ mb: 0.5, px: 1, fontWeight: 600, color: 'text.secondary' }}>
+                  {msg.remetente_id === usuario.id ? "Você" : msg.remetente_nome}
+                </Typography>
+                <Paper 
+                  sx={{ 
+                    p: 1.5, 
+                    bgcolor: msg.remetente_id === usuario.id ? 'primary.main' : 'white',
+                    color: msg.remetente_id === usuario.id ? 'white' : 'text.primary',
+                    borderRadius: msg.remetente_id === usuario.id ? '20px 20px 0 20px' : '20px 20px 20px 0',
+                    boxShadow: '0px 2px 5px rgba(0,0,0,0.05)'
+                  }}
+                >
+                  <Typography variant="body2">{msg.conteudo}</Typography>
+                </Paper>
+                <Typography variant="caption" sx={{ fontSize: '9px', mt: 0.5, opacity: 0.7 }}>
+                  {new Date(msg.data_envio).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </Typography>
+              </Box>
             </Box>
           ))}
           <div ref={scrollRef} />
         </Stack>
       </Paper>
 
-      <Box component="form" onSubmit={enviarMensagem} sx={{ display: 'flex', gap: 1 }}>
+      <Box component="form" onSubmit={enviarMensagem} sx={{ display: 'flex', gap: 1, p: 1 }}>
         <TextField
           fullWidth
           size="small"
-          placeholder="Digite sua mensagem..."
+          placeholder="Escreva uma mensagem..."
           value={novaMensagem}
           onChange={(e) => setNovaMensagem(e.target.value)}
-          sx={{ '& .MuiOutlinedInput-root': { borderRadius: 4 } }}
+          sx={{ '& .MuiOutlinedInput-root': { borderRadius: 6, bgcolor: 'white' } }}
         />
-        <IconButton type="submit" color="primary" sx={{ bgcolor: 'primary.main', color: 'white', '&:hover': { bgcolor: 'primary.dark' } }}>
+        <IconButton type="submit" color="primary" disabled={!novaMensagem.trim()} sx={{ bgcolor: 'primary.main', color: 'white', '&:hover': { bgcolor: 'primary.dark' }, '&.Mui-disabled': { bgcolor: '#ccc' } }}>
           <SendIcon fontSize="small" />
         </IconButton>
       </Box>
