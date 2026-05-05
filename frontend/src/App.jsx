@@ -29,17 +29,36 @@ function App() {
     document.title = "Recoopere | Achados e Perdidos";
   }, []);
 
+  // Definindo Tokens de Cores baseados nos arquivos fornecidos
+  const lightColors = {
+    primary: '#005ac1',
+    onPrimary: '#ffffff',
+    primaryContainer: '#d8e2ff',
+    onPrimaryContainer: '#001a41',
+  };
+
+  const darkColors = {
+    primary: '#adc6ff',
+    onPrimary: '#002e69',
+    primaryContainer: '#004494',
+    onPrimaryContainer: '#d8e2ff',
+  };
+
   const theme = useMemo(() => createTheme({
     palette: {
       mode: darkMode ? 'dark' : 'light',
-      primary: { main: '#00529b' },
-      secondary: { main: '#ffca28' },
+      primary: { 
+        main: darkMode ? darkColors.primary : lightColors.primary,
+        contrastText: darkMode ? darkColors.onPrimary : lightColors.onPrimary,
+      },
+      // Passando os tokens como propriedades customizadas para usar no sx
+      tokens: darkMode ? darkColors : lightColors,
       background: {
-        default: darkMode ? '#121212' : '#f4f7f9',
-        paper: darkMode ? '#1e1e1e' : '#ffffff',
+        default: darkMode ? '#1b1b1f' : '#fefbff',
+        paper: darkMode ? '#1b1b1f' : '#ffffff',
       },
     },
-    shape: { borderRadius: 12 },
+    shape: { borderRadius: 16 },
     typography: {
       fontFamily: '"Poppins", "Roboto", "Inter", sans-serif',
       h4: { fontWeight: 700 },

@@ -233,14 +233,20 @@ def excluir_item(item_id: int, usuario_id: int, db: Session = Depends(get_db)):
     db.commit()
     return {"mensagem": "Excluído."}
 
-@app.patch("/itens/{item_id}/devolver", status_code=status.HTTP_200_OK)
-def marcar_devolvido(item_id: int, usuario_id: int, db: Session = Depends(get_db)):
-    item = db.query(models.Item).filter(models.Item.id == item_id).first()
-    if not item or item.dono_id != usuario_id:
-        raise HTTPException(status_code=403, detail="Não permitido.")
-    item.status = "devolvido"
+@app.patch("/usuarios/{usuario_id}/foto", response_model=schemas.UsuarioResponse)
+async def atualizar_foto_perfil(usuario_id: int, imagem: UploadFile = File(...), db: Session = Depends(get_db)):
+    usuario = db.query(models.Usuario).filter(models.Usuario.id == usuario_id).first()
+    if not usuario: raise HTTPException(status_code=404, detail="Usuário não encontrado.")
+    
+    caminho = f"{UPLOAD_DIR}/user_{usuario_id}_{imagem.filename}"
+    with open(caminho, "wb") as buffer:
+        shutil.copyfileobj(imagem.file, buffer)
+    
+    usuario.imagem_url = caminho
     db.commit()
-    return {"mensagem": "Devolvido."}
+    db.refresh(usuario)
+    return usuario
+
 
 @app.put("/itens/{item_id}", response_model=schemas.ItemResponse)
 def editar_item(

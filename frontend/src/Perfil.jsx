@@ -9,9 +9,11 @@ import {
   Paper, 
   Alert,
   Avatar,
-  Stack
+  Stack,
+  IconButton
 } from '@mui/material';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import PhotoCamera from '@mui/icons-material/PhotoCamera';
 
 function Perfil({ usuario, onUpdateUsuario }) {
   const [nome, setNome] = useState(usuario.nome);
@@ -22,6 +24,20 @@ function Perfil({ usuario, onUpdateUsuario }) {
   useEffect(() => {
     document.title = "Recoopere | Meu Perfil";
   }, []);
+
+  const handleUpdateFoto = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const formData = new FormData();
+    formData.append('imagem', file);
+    try {
+      const resp = await axios.patch(`http://127.0.0.1:8000/usuarios/${usuario.id}/foto`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      onUpdateUsuario(resp.data);
+      alert("Foto atualizada!");
+    } catch(e) { alert("Erro ao subir foto"); }
+  };
 
   const handleUpdate = async (e) => {
     e.preventDefault();
@@ -47,11 +63,17 @@ function Perfil({ usuario, onUpdateUsuario }) {
     <Container maxWidth="sm" sx={{ mt: 4 }}>
       <Paper elevation={3} sx={{ p: 4, borderRadius: 4 }}>
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 3 }}>
-          <Avatar sx={{ m: 1, bgcolor: 'primary.main', width: 56, height: 56 }}>
-            <AccountCircleIcon fontSize="large" />
-          </Avatar>
+          <Box sx={{ position: 'relative' }}>
+             <Avatar src={usuario.imagem_url ? `http://127.0.0.1:8000/${usuario.imagem_url}` : undefined} sx={{ m: 1, bgcolor: 'primary.main', width: 80, height: 80 }}>
+                {!usuario.imagem_url && <AccountCircleIcon fontSize="large" />}
+             </Avatar>
+             <IconButton component="label" sx={{ position: 'absolute', bottom: 0, right: 0, bgcolor: 'background.paper' }}>
+                <PhotoCamera />
+                <input type="file" hidden accept="image/*" onChange={handleUpdateFoto} />
+             </IconButton>
+          </Box>
           <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
-            Meu Perfil
+            {usuario.nome}
           </Typography>
         </Box>
 

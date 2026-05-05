@@ -98,7 +98,9 @@ function Chat({ item, usuario, destinatarioId, onVerItem }) {
                   sx={{ 
                     p: 1.5, 
                     bgcolor: msg.remetente_id === usuario.id ? 'primary.main' : 'background.paper',
-                    color: msg.remetente_id === usuario.id ? 'white' : 'text.primary',
+                    color: (theme) => msg.remetente_id === usuario.id 
+                      ? theme.palette.getContrastText(theme.palette.primary.main) 
+                      : 'text.primary',
                     borderRadius: msg.remetente_id === usuario.id ? '20px 20px 0 20px' : '20px 20px 20px 0',
                     boxShadow: '0px 2px 5px rgba(0,0,0,0.05)'
                   }}

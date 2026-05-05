@@ -110,9 +110,16 @@ function Login({ onLoginSucesso, onIrParaCadastro }) {
             </Button>
             <Button
               fullWidth
-              variant="outlined"
+              variant="contained"
               onClick={onIrParaCadastro}
-              sx={{ py: 1.2, fontWeight: 600 }}
+              sx={{ 
+                py: 1.5, 
+                fontWeight: 800, 
+                bgcolor: (theme) => theme.palette.tokens.primaryContainer, 
+                color: (theme) => theme.palette.tokens.onPrimaryContainer,
+                boxShadow: 'none',
+                '&:hover': { bgcolor: (theme) => theme.palette.tokens.primaryContainer, filter: 'brightness(0.9)' }
+              }}
             >
               Criar nova conta
             </Button>

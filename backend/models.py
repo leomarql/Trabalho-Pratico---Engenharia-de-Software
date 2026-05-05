@@ -11,6 +11,7 @@ class Usuario(Base):
     email = Column(String, unique=True, index=True)
     senha = Column(String)
     is_admin = Column(Boolean, default=False)
+    imagem_url = Column(String, nullable=True) # Foto de perfil
 
 class Item(Base):
     __tablename__ = "itens"
@@ -20,13 +21,12 @@ class Item(Base):
     descricao = Column(String)
     categoria = Column(String)
     local_encontrado = Column(String)
-    data_encontrado = Column(DateTime(timezone=True), nullable=True) # Quando o item foi achado
+    data_encontrado = Column(DateTime(timezone=True), nullable=True)
     status = Column(String, default="ativo")
     imagem_url = Column(String, nullable=True)
     
     dono_id = Column(Integer, ForeignKey("usuarios.id"))
     
-    # Relacionamento para facilitar a contagem e listagem
     reivindicacoes = relationship("Reivindicacao", back_populates="item")
 
 class Reivindicacao(Base):

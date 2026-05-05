@@ -47,7 +47,6 @@ function Header({
     <AppBar position="sticky" elevation={0} sx={{ bgcolor: darkMode ? 'background.paper' : 'white', color: 'primary.main', borderBottom: '1px solid', borderColor: 'divider' }}>
       <Container maxWidth="lg">
         <Toolbar sx={{ px: { xs: 0 } }}>
-          {/* Logo e Nome do Sistema */}
           <Box 
             sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexGrow: 1, cursor: 'pointer' }} 
             onClick={onIrParaHome}
@@ -65,7 +64,7 @@ function Header({
                 fontWeight: 800, 
                 letterSpacing: '-0.5px',
                 display: { xs: 'none', sm: 'block' },
-                color: '#00529b' // Azul fixo para o nome
+                color: 'primary.main'
               }}
             >
               Recoopere
@@ -73,7 +72,6 @@ function Header({
           </Box>
           
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            {/* TEMA DARK TOGGLE */}
             <Tooltip title={darkMode ? "Ativar Luz" : "Ativar Noite"}>
               <IconButton onClick={toggleDarkMode} color="inherit">
                 {darkMode ? <Brightness7Icon /> : <Brightness4Icon />}
@@ -87,9 +85,15 @@ function Header({
                 </Button>
                 <Button 
                   variant="contained" 
-                  color="secondary" 
                   onClick={onIrParaCadastro}
-                  sx={{ fontWeight: 700, borderRadius: 2, color: 'primary.main' }}
+                  sx={{ 
+                    fontWeight: 700, 
+                    borderRadius: 3, 
+                    px: 3,
+                    bgcolor: 'primary.main', 
+                    color: 'white',
+                    '&:hover': { bgcolor: 'primary.dark' }
+                  }}
                 >
                   Cadastrar
                 </Button>

@@ -22,6 +22,7 @@ class UsuarioResponse(BaseModel):
     nome: str
     email: str
     is_admin: bool
+    imagem_url: Optional[str] = None
 
     class Config:
         from_attributes = True
