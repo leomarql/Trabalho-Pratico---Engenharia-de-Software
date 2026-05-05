@@ -166,7 +166,7 @@ function MeusAnuncios({ usuario, onVerDetalhes }) {
       )}
 
       <Dialog open={Boolean(chatAberto)} onClose={() => setChatAberto(null)} fullWidth maxWidth="xs">
-        <DialogTitle sx={{ fontWeight: '800' }}>Conversa com {chatAberto?.outroUsuarioNome}</DialogTitle>
+        <DialogTitle sx={{ fontWeight: '800', color: 'primary.main' }}>Conversa com {chatAberto?.outroUsuarioNome}</DialogTitle>
         <DialogContent sx={{ p: 0 }}>
           {chatAberto && (
             <Chat 
@@ -180,7 +180,7 @@ function MeusAnuncios({ usuario, onVerDetalhes }) {
       </Dialog>
 
       <Dialog open={Boolean(editandoItem)} onClose={() => setEditandoItem(null)} fullWidth maxWidth="sm">
-        <DialogTitle sx={{ fontWeight: '800' }}>✏️ Editar Anúncio</DialogTitle>
+        <DialogTitle sx={{ fontWeight: '800', color: 'primary.main' }}>✏️ Editar Anúncio</DialogTitle>
         <DialogContent>
           <Box component="form" onSubmit={salvarEdicao} sx={{ mt: 2 }}>
             <Stack spacing={3}>

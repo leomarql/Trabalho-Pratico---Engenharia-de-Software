@@ -93,7 +93,7 @@ function Mural({ usuario, onVerDetalhes }) {
     if (!window.confirm("Você acredita que este item é seu?")) return;
     try {
       await axios.patch(`http://127.0.0.1:8000/itens/${itemId}/reivindicar?usuario_id=${usuario.id}`);
-      alert("Item reivindicado!");
+      alert("Item reivindicado! Vá em 'Minhas Conversas' no botão azul abaixo para falar com o anunciante.");
       carregarItens();
     } catch (erro) {
       alert("Erro: " + (erro.response?.data?.detail || "Erro desconhecido"));
@@ -264,7 +264,7 @@ function Mural({ usuario, onVerDetalhes }) {
       </Fab>
 
       <Dialog open={openDialog} onClose={() => setOpenDialog(false)} fullWidth maxWidth="sm">
-        <DialogTitle sx={{ fontWeight: '800' }}>📢 Novo Anúncio</DialogTitle>
+        <DialogTitle sx={{ fontWeight: '800', color: 'primary.main' }}>📢 Novo Anúncio</DialogTitle>
         <DialogContent><CadastroItem usuario={usuario} onSucesso={() => { carregarItens(); setOpenDialog(false); }} /></DialogContent>
       </Dialog>
     </Box>

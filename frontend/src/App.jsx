@@ -141,7 +141,7 @@ function App() {
         {usuarioLogado && (
           <>
             <Dialog open={listaChatsAberta} onClose={() => setListaChatsAberta(false)} fullWidth maxWidth="xs">
-              <DialogTitle sx={{ fontWeight: '800' }}>Chat - Minhas Conversas</DialogTitle>
+              <DialogTitle sx={{ fontWeight: '800', color: 'primary.main' }}>Chat - Minhas Conversas</DialogTitle>
               <DialogContent sx={{ p: 1 }}>
                 <ListaChats 
                   usuario={usuarioLogado} 
@@ -154,7 +154,7 @@ function App() {
             </Dialog>
 
             <Dialog open={Boolean(chatAtivo)} onClose={() => setChatAtivo(null)} fullWidth maxWidth="xs">
-              <DialogTitle sx={{ fontWeight: '800' }}>Chat com {chatAtivo?.outroUsuarioNome}</DialogTitle>
+              <DialogTitle sx={{ fontWeight: '800', color: 'primary.main' }}>Chat com {chatAtivo?.outroUsuarioNome}</DialogTitle>
               <DialogContent sx={{ p: 0 }}>
                 {chatAtivo && (
                   <Chat 
