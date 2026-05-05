@@ -67,6 +67,15 @@ function App() {
     setView('mural');
   };
 
+  const handleLogoClick = () => {
+    if (usuarioLogado) {
+      setView('mural');
+    } else {
+      setView('home');
+      setTelaAuth(null);
+    }
+  };
+
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="pt-br">
       <ThemeProvider theme={theme}>
@@ -76,7 +85,7 @@ function App() {
           onLogout={handleLogout}
           onIrParaMural={() => setView('mural')}
           onIrParaPerfil={() => setView('perfil')}
-          onIrParaHome={() => setView('home')}
+          onIrParaHome={handleLogoClick}
           onIrParaMeusAnuncios={() => setView('meus-anuncios')}
           onIrParaArquivados={() => setView('arquivados')}
           onIrParaLogin={() => { setView('home'); setTelaAuth('login'); }}
