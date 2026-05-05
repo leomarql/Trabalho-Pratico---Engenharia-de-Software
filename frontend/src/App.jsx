@@ -3,6 +3,8 @@ import { createTheme, ThemeProvider, CssBaseline } from '@mui/material';
 import Login from './Login';
 import Cadastro from './Cadastro';
 import Mural from './Mural';
+import Perfil from './Perfil';
+import Header from './Header';
 
 // Configuração do Tema Material You (Material Design 3)
 const theme = createTheme({
@@ -28,11 +30,18 @@ const theme = createTheme({
 function App() {
   const [usuarioLogado, setUsuarioLogado] = useState(null);
   const [telaAuth, setTelaAuth] = useState('login');
+  const [view, setView] = useState('mural'); // Gerencia a tela interna: 'mural' ou 'perfil'
+
+  const handleLogout = () => {
+    setUsuarioLogado(null);
+    setTelaAuth('login');
+    setView('mural');
+  };
 
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <div>
+      <div className="app-container">
         {!usuarioLogado ? (
           telaAuth === 'login' ? (
             <Login
@@ -43,7 +52,22 @@ function App() {
             <Cadastro onVoltarLogin={() => setTelaAuth('login')} />
           )
         ) : (
-          <Mural usuario={usuarioLogado} />
+          <>
+            <Header 
+              usuario={usuarioLogado} 
+              onLogout={handleLogout}
+              onIrParaMural={() => setView('mural')}
+              onIrParaPerfil={() => setView('perfil')}
+            />
+            {view === 'mural' ? (
+              <Mural usuario={usuarioLogado} />
+            ) : (
+              <Perfil 
+                usuario={usuarioLogado} 
+                onUpdateUsuario={(novosDados) => setUsuarioLogado(novosDados)} 
+              />
+            )}
+          </>
         )}
       </div>
     </ThemeProvider>

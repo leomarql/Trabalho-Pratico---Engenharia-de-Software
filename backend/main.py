@@ -180,6 +180,31 @@ def promover_para_admin(usuario_id: int, db: Session = Depends(get_db)):
     
     return {"mensagem": f"O usuário {usuario.nome} agora é um ADMINISTRADOR!"}
 
+# --- ROTA PARA ATUALIZAR DADOS DO USUÁRIO ---
+@app.put("/usuarios/{usuario_id}", response_model=schemas.UsuarioResponse)
+def atualizar_usuario(usuario_id: int, usuario_update: schemas.UsuarioUpdate, db: Session = Depends(get_db)):
+    db_usuario = db.query(models.Usuario).filter(models.Usuario.id == usuario_id).first()
+    if not db_usuario:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado.")
+
+    if usuario_update.nome is not None:
+        db_usuario.nome = usuario_update.nome
+    
+    if usuario_update.email is not None:
+        # Verifica se o novo e-mail já existe
+        if usuario_update.email != db_usuario.email:
+            email_existe = db.query(models.Usuario).filter(models.Usuario.email == usuario_update.email).first()
+            if email_existe:
+                raise HTTPException(status_code=400, detail="E-mail já cadastrado.")
+            db_usuario.email = usuario_update.email
+    
+    if usuario_update.senha is not None:
+        db_usuario.senha = security.get_password_hash(usuario_update.senha)
+
+    db.commit()
+    db.refresh(db_usuario)
+    return db_usuario
+
 # --- ROTA PARA LISTAR OS 10 ÚLTIMOS ANÚNCIOS LIMITADOS AOS ITENS MARCADOS COMO ATIVOS ---
 @app.get("/itens", response_model=list[schemas.ItemResponse])
 def listar_itens(db: Session = Depends(get_db)):

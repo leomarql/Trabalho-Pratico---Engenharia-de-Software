@@ -31,6 +31,19 @@ class UsuarioLogin(BaseModel):
     email: str
     senha: str
 
+# 4. Schema para atualização de dados do usuário
+class UsuarioUpdate(BaseModel):
+    nome: Optional[str] = None
+    email: Optional[str] = None
+    senha: Optional[str] = None
+
+    @field_validator('email')
+    @classmethod
+    def validar_email_ufmg(cls, v):
+        if v is not None and not v.endswith('@ufmg.br'):
+            raise ValueError('O e-mail deve obrigatoriamente terminar com @ufmg.br')
+        return v
+
 # --- SCHEMAS PARA ANÚNCIOS (ITENS) ---
 class ItemCreate(BaseModel):
     titulo: str

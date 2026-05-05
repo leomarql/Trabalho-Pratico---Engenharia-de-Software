@@ -1,13 +1,10 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { 
-  AppBar, 
-  Toolbar, 
   Typography, 
   Container, 
   Grid, 
   Card, 
-  CardHeader, 
   CardMedia, 
   CardContent, 
   CardActions, 
@@ -19,13 +16,11 @@ import {
   DialogTitle,
   DialogContent,
   Chip,
-  Avatar,
   Paper
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import AddIcon from '@mui/icons-material/Add';
-import LogoutIcon from '@mui/icons-material/Logout';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 
 import CadastroItem from './CadastroItem';
@@ -68,27 +63,10 @@ function Mural({ usuario }) {
   }, []);
 
   return (
-    <Box sx={{ flexGrow: 1, bgcolor: 'background.default', minHeight: '100vh', pb: 8 }}>
-      {/* BARRA SUPERIOR */}
-      <AppBar position="static" elevation={0} sx={{ borderRadius: '0 0 16px 16px' }}>
-        <Toolbar>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1, fontWeight: 'bold' }}>
-            Achados e Perdidos UFMG
-          </Typography>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Typography variant="body2" sx={{ display: { xs: 'none', sm: 'block' } }}>
-              Olá, <b>{usuario.nome}</b>
-            </Typography>
-            <IconButton color="inherit" onClick={() => window.location.reload()}>
-              <LogoutIcon />
-            </IconButton>
-          </Box>
-        </Toolbar>
-      </AppBar>
-
-      <Container maxWidth="lg" sx={{ mt: 4 }}>
+    <Box sx={{ flexGrow: 1, bgcolor: 'background.default', pb: 8 }}>
+      <Container maxWidth="lg">
         <Typography variant="h4" sx={{ mb: 4, fontWeight: '500', color: 'primary.main' }}>
-          Mural de Itens
+          Últimos Itens Encontrados
         </Typography>
 
         <Grid container spacing={3}>
