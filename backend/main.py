@@ -216,3 +216,38 @@ def marcar_devolvido(item_id: int, usuario_id: int, db: Session = Depends(get_db
     item.status = "devolvido"
     db.commit()
     return {"mensagem": "Devolvido."}
+
+@app.put("/itens/{item_id}", response_model=schemas.ItemResponse)
+def editar_item(
+    item_id: int, 
+    usuario_id: int,
+    titulo: str = Form(...),
+    descricao: str = Form(...),
+    categoria: str = Form(...),
+    local_encontrado: str = Form(...),
+    imagem: UploadFile = File(None),
+    db: Session = Depends(get_db)
+):
+    item = db.query(models.Item).filter(models.Item.id == item_id).first()
+    if not item: raise HTTPException(status_code=404, detail="Item não encontrado.")
+    if item.dono_id != usuario_id: raise HTTPException(status_code=403, detail="Acesso negado.")
+
+    item.titulo = titulo
+    item.descricao = descricao
+    item.categoria = categoria
+    item.local_encontrado = local_encontrado
+
+    if imagem:
+        caminho_imagem = f"{UPLOAD_DIR}/{imagem.filename}"
+        with open(caminho_imagem, "wb") as buffer:
+            shutil.copyfileobj(imagem.file, buffer)
+        item.imagem_url = caminho_imagem
+
+    db.commit()
+    db.refresh(item)
+    return {
+        **item.__dict__,
+        "total_reivindicacoes": len(item.reivindicacoes),
+        "reivindicacoes": []
+    }
+

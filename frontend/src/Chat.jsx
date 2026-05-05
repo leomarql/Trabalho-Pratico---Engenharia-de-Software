@@ -7,11 +7,14 @@ import {
   Paper, 
   Stack, 
   IconButton,
-  Avatar
+  Avatar,
+  Button,
+  Divider
 } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 
-function Chat({ item, usuario, destinatarioId }) {
+function Chat({ item, usuario, destinatarioId, onVerItem }) {
   const [mensagens, setMensagens] = useState([]);
   const [novaMensagem, setNovaMensagem] = useState('');
   const scrollRef = useRef();
@@ -43,7 +46,7 @@ function Chat({ item, usuario, destinatarioId }) {
   };
 
   useEffect(() => {
-    carregarMensagens();
+    carregarMeusMensagens();
     const interval = setInterval(carregarMensagens, 3000);
     return () => clearInterval(interval);
   }, [item.id]);
@@ -52,15 +55,32 @@ function Chat({ item, usuario, destinatarioId }) {
     scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [mensagens]);
 
+  const carregarMeusMensagens = () => carregarMensagens();
+
   return (
-    <Box sx={{ height: '450px', display: 'flex', flexDirection: 'column' }}>
-      <Box sx={{ p: 1, borderBottom: '1px solid #eee', mb: 1 }}>
-        <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>
-          {item.titulo}
-        </Typography>
+    <Box sx={{ height: '500px', display: 'flex', flexDirection: 'column' }}>
+      {/* TÍTULO E BOTÃO DE DETALHES */}
+      <Box sx={{ p: 2, borderBottom: '1px solid #eee', display: 'flex', justifyContent: 'space-between', alignItems: 'center', bgcolor: 'white' }}>
+        <Box>
+          <Typography variant="caption" sx={{ fontWeight: 800, color: 'primary.main', display: 'block', textTransform: 'uppercase' }}>
+            Chat de Devolução
+          </Typography>
+          <Typography variant="subtitle1" sx={{ fontWeight: 'bold', lineHeight: 1.2 }}>
+            {item.titulo}
+          </Typography>
+        </Box>
+        <Button 
+          size="small" 
+          variant="outlined" 
+          startIcon={<InfoOutlinedIcon />} 
+          onClick={() => onVerItem(item.id)}
+          sx={{ borderRadius: 2 }}
+        >
+          Ver Item
+        </Button>
       </Box>
       
-      <Paper variant="outlined" sx={{ flexGrow: 1, p: 2, overflowY: 'auto', mb: 2, bgcolor: '#f5f5f5', borderRadius: 3, border: 'none' }}>
+      <Paper variant="outlined" sx={{ flexGrow: 1, p: 2, overflowY: 'auto', mb: 1, bgcolor: '#f5f5f5', borderRadius: 0, border: 'none' }}>
         <Stack spacing={2}>
           {mensagens.map((msg) => (
             <Box 
@@ -95,7 +115,7 @@ function Chat({ item, usuario, destinatarioId }) {
         </Stack>
       </Paper>
 
-      <Box component="form" onSubmit={enviarMensagem} sx={{ display: 'flex', gap: 1, p: 1 }}>
+      <Box component="form" onSubmit={enviarMensagem} sx={{ display: 'flex', gap: 1, p: 2, bgcolor: 'white' }}>
         <TextField
           fullWidth
           size="small"

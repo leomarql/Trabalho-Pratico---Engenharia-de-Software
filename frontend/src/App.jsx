@@ -31,7 +31,7 @@ function App() {
   const [view, setView] = useState('home');
   const [itemSelecionadoId, setItemSelecionadoId] = useState(null);
   const [listaChatsAberta, setListaChatsAberta] = useState(false);
-  const [chatAtivo, setChatAtivo] = useState(null); // { item, outroUsuarioId, outroUsuarioNome }
+  const [chatAtivo, setChatAtivo] = useState(null);
 
   const handleLogout = () => {
     setUsuarioLogado(null);
@@ -79,7 +79,7 @@ function App() {
               onUpdateUsuario={(novosDados) => setUsuarioLogado(novosDados)} 
             />
           )}
-          {view === 'meus-anuncios' && <MeusAnuncios usuario={usuarioLogado} />}
+          {view === 'meus-anuncios' && <MeusAnuncios usuario={usuarioLogado} onVerDetalhes={abrirDetalhesItem} />}
           {view === 'item-detalhes' && (
             <ItemDetalhes 
               itemId={itemSelecionadoId} 
@@ -88,7 +88,6 @@ function App() {
             />
           )}
 
-          {/* BOTÃO FLUTUANTE DE CHATS (Acima do FAB de adicionar no Mural) */}
           <Tooltip title="Minhas Conversas">
             <Fab 
               color="primary" 
@@ -101,9 +100,8 @@ function App() {
         </Box>
       )}
 
-      {/* DIALOG DE LISTA DE CHATS */}
       <Dialog open={listaChatsAberta} onClose={() => setListaChatsAberta(false)} fullWidth maxWidth="xs">
-        <DialogTitle sx={{ fontWeight: '800' }}>Minhas Conversas</DialogTitle>
+        <DialogTitle sx={{ fontWeight: '800' }}>Chat - Minhas Conversas</DialogTitle>
         <DialogContent sx={{ p: 1 }}>
           <ListaChats 
             usuario={usuarioLogado} 
@@ -115,15 +113,15 @@ function App() {
         </DialogContent>
       </Dialog>
 
-      {/* DIALOG DO CHAT ATIVO */}
       <Dialog open={Boolean(chatAtivo)} onClose={() => setChatAtivo(null)} fullWidth maxWidth="xs">
-        <DialogTitle sx={{ fontWeight: '800' }}>Conversa com {chatAtivo?.outroUsuarioNome}</DialogTitle>
+        <DialogTitle sx={{ fontWeight: '800' }}>Chat com {chatAtivo?.outroUsuarioNome}</DialogTitle>
         <DialogContent sx={{ p: 0 }}>
           {chatAtivo && (
             <Chat 
               item={chatAtivo.item} 
               usuario={usuarioLogado} 
               destinatarioId={chatAtivo.outroUsuarioId} 
+              onVerItem={(id) => { abrirDetalhesItem(id); setChatAtivo(null); }}
             />
           )}
         </DialogContent>
