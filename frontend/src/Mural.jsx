@@ -16,27 +16,49 @@ import {
   DialogTitle,
   DialogContent,
   Chip,
-  Paper
+  Paper,
+  TextField,
+  InputAdornment,
+  MenuItem
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import AddIcon from '@mui/icons-material/Add';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
+import SearchIcon from '@mui/icons-material/Search';
+import FilterListIcon from '@mui/icons-material/FilterList';
 
 import CadastroItem from './CadastroItem';
 
 function Mural({ usuario }) {
   const [itens, setItens] = useState([]);
+  const [itensFiltrados, setItensFiltrados] = useState([]);
+  const [busca, setBusca] = useState('');
+  const [categoriaFiltro, setCategoriaFiltro] = useState('Todos');
   const [openDialog, setOpenDialog] = useState(false);
+
+  const categorias = ['Todos', 'Eletrônicos', 'Documentos', 'Roupas', 'Outros'];
 
   const carregarItens = async () => {
     try {
       const resposta = await axios.get('http://127.0.0.1:8000/itens');
       setItens(resposta.data);
+      setItensFiltrados(resposta.data);
     } catch (erro) {
       console.error("Erro ao carregar itens", erro);
     }
   };
+
+  // Efeito para filtrar os itens quando a busca ou a categoria mudam
+  useEffect(() => {
+    const filtrados = itens.filter((item) => {
+      const matchBusca = item.titulo.toLowerCase().includes(busca.toLowerCase()) || 
+                         item.descricao.toLowerCase().includes(busca.toLowerCase());
+      const matchCategoria = categoriaFiltro === 'Todos' || item.categoria === categoriaFiltro;
+      return matchBusca && matchCategoria;
+    });
+    setItensFiltrados(filtrados);
+  }, [busca, categoriaFiltro, itens]);
 
   const marcarDevolvido = async (itemId) => {
     if (!window.confirm("Deseja marcar este item como devolvido? Ele sairá do mural.")) return;
@@ -65,65 +87,111 @@ function Mural({ usuario }) {
   return (
     <Box sx={{ flexGrow: 1, bgcolor: 'background.default', pb: 8 }}>
       <Container maxWidth="lg">
-        <Typography variant="h4" sx={{ mb: 4, fontWeight: '500', color: 'primary.main' }}>
-          Últimos Itens Encontrados
+        <Typography variant="h4" sx={{ mb: 4, fontWeight: '800', color: 'primary.main' }}>
+          Mural de Achados e Perdidos
         </Typography>
 
+        {/* BARRA DE FILTROS */}
+        <Paper sx={{ p: 2, mb: 4, borderRadius: 4, display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
+          <TextField
+            placeholder="Pesquisar por título ou descrição..."
+            variant="outlined"
+            size="small"
+            value={busca}
+            onChange={(e) => setBusca(e.target.value)}
+            sx={{ flexGrow: 1, minWidth: '250px' }}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon color="action" />
+                </InputAdornment>
+              ),
+              sx: { borderRadius: 3 }
+            }}
+          />
+          <TextField
+            select
+            label="Categoria"
+            size="small"
+            value={categoriaFiltro}
+            onChange={(e) => setCategoriaFiltro(e.target.value)}
+            sx={{ minWidth: '150px' }}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <FilterListIcon color="action" />
+                </InputAdornment>
+              ),
+              sx: { borderRadius: 3 }
+            }}
+          >
+            {categorias.map((cat) => (
+              <MenuItem key={cat} value={cat}>{cat}</MenuItem>
+            ))}
+          </TextField>
+          <Typography variant="body2" color="text.secondary" sx={{ ml: 'auto', fontWeight: 600 }}>
+            {itensFiltrados.length} itens encontrados
+          </Typography>
+        </Paper>
+
         <Grid container spacing={3}>
-          {itens.length === 0 ? (
+          {itensFiltrados.length === 0 ? (
             <Grid item xs={12}>
-              <Paper sx={{ p: 4, textAlign: 'center', borderRadius: 4, bgcolor: '#f0f0f0' }}>
-                <Typography color="text.secondary">Nenhum item encontrado no momento.</Typography>
+              <Paper sx={{ p: 8, textAlign: 'center', borderRadius: 6, bgcolor: 'white' }}>
+                <SearchIcon sx={{ fontSize: 64, color: '#ddd', mb: 2 }} />
+                <Typography variant="h6" color="text.secondary">Ops! Nenhum item corresponde à sua busca.</Typography>
+                <Button sx={{ mt: 2 }} onClick={() => { setBusca(''); setCategoriaFiltro('Todos'); }}>Limpar Filtros</Button>
               </Paper>
             </Grid>
-          ) : itens.map((item) => (
+          ) : itensFiltrados.map((item) => (
             <Grid item key={item.id} xs={12} sm={6} md={4}>
               <Card sx={{ 
                 height: '100%', 
                 display: 'flex', 
                 flexDirection: 'column',
                 borderRadius: 4,
+                boxShadow: '0px 10px 20px rgba(0,0,0,0.05)',
                 transition: 'transform 0.2s',
-                '&:hover': { transform: 'scale(1.02)' }
+                '&:hover': { transform: 'translateY(-5px)', boxShadow: '0px 15px 30px rgba(0,0,0,0.1)' }
               }}>
                 {item.imagem_url ? (
                   <CardMedia
                     component="img"
-                    height="200"
+                    height="220"
                     image={`http://127.0.0.1:8000/${item.imagem_url}`}
                     alt={item.titulo}
                   />
                 ) : (
-                  <Box sx={{ height: 200, bgcolor: 'grey.300', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <Typography color="text.secondary">Sem foto</Typography>
+                  <Box sx={{ height: 220, bgcolor: 'grey.200', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <SearchIcon sx={{ fontSize: 40, color: 'grey.400' }} />
                   </Box>
                 )}
                 
-                <CardContent sx={{ flexGrow: 1 }}>
-                  <Typography gutterBottom variant="h6" component="h2" sx={{ fontWeight: 'bold' }}>
-                    {item.titulo}
-                  </Typography>
+                <CardContent sx={{ flexGrow: 1, p: 3 }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
+                    <Typography variant="h6" component="h2" sx={{ fontWeight: '800', lineHeight: 1.2 }}>
+                      {item.titulo}
+                    </Typography>
+                    <Chip label={item.categoria} size="small" color="primary" sx={{ fontWeight: 600, borderRadius: 1.5 }} />
+                  </Box>
                   
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1, color: 'text.secondary' }}>
-                    <LocationOnIcon sx={{ fontSize: 18, mr: 0.5 }} />
-                    <Typography variant="body2">{item.local_encontrado}</Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, color: 'text.secondary' }}>
+                    <LocationOnIcon sx={{ fontSize: 16, mr: 0.5, color: 'secondary.main' }} />
+                    <Typography variant="caption" sx={{ fontWeight: 600 }}>{item.local_encontrado}</Typography>
                   </Box>
 
                   <Typography variant="body2" color="text.secondary" sx={{
                     display: '-webkit-box',
                     WebkitLineClamp: 3,
                     WebkitBoxOrient: 'vertical',
-                    overflow: 'hidden'
+                    overflow: 'hidden',
+                    lineHeight: 1.6
                   }}>
                     {item.descricao}
                   </Typography>
-                  
-                  <Box sx={{ mt: 2 }}>
-                    <Chip label={item.categoria} size="small" color="primary" variant="outlined" />
-                  </Box>
                 </CardContent>
 
-                <CardActions sx={{ justifyContent: 'space-between', px: 2, pb: 2 }}>
+                <CardActions sx={{ justifyContent: 'space-between', px: 3, pb: 3, pt: 0 }}>
                   <Box>
                     {usuario.id === item.dono_id && (
                       <Button 
@@ -132,7 +200,7 @@ function Mural({ usuario }) {
                         color="success" 
                         startIcon={<CheckCircleIcon />}
                         onClick={() => marcarDevolvido(item.id)}
-                        sx={{ borderRadius: 2 }}
+                        sx={{ borderRadius: 2, fontWeight: 700, px: 2 }}
                       >
                         Devolvido
                       </Button>
@@ -140,8 +208,8 @@ function Mural({ usuario }) {
                   </Box>
                   <Box>
                     {(usuario.is_admin || usuario.id === item.dono_id) && (
-                      <IconButton color="error" onClick={() => deletarItem(item.id)}>
-                        <DeleteIcon />
+                      <IconButton color="error" onClick={() => deletarItem(item.id)} sx={{ bgcolor: 'error.light', color: 'white', '&:hover': { bgcolor: 'error.main' } }}>
+                        <DeleteIcon fontSize="small" />
                       </IconButton>
                     )}
                   </Box>
@@ -154,9 +222,9 @@ function Mural({ usuario }) {
 
       {/* BOTÃO FLUTUANTE PARA ADICIONAR */}
       <Fab 
-        color="primary" 
+        color="secondary" 
         aria-label="add" 
-        sx={{ position: 'fixed', bottom: 32, right: 32 }}
+        sx={{ position: 'fixed', bottom: 32, right: 32, color: 'primary.main', fontWeight: 'bold' }}
         onClick={() => setOpenDialog(true)}
       >
         <AddIcon />
@@ -168,9 +236,9 @@ function Mural({ usuario }) {
         onClose={() => setOpenDialog(false)}
         fullWidth
         maxWidth="sm"
-        PaperProps={{ sx: { borderRadius: 4 } }}
+        PaperProps={{ sx: { borderRadius: 4, p: 2 } }}
       >
-        <DialogTitle sx={{ fontWeight: 'bold' }}>Anunciar Novo Item</DialogTitle>
+        <DialogTitle sx={{ fontWeight: '800', color: 'primary.main' }}>📢 Anunciar Novo Item</DialogTitle>
         <DialogContent>
           <CadastroItem 
             usuario={usuario} 
