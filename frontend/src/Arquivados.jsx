@@ -17,11 +17,13 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 function Arquivados({ usuario }) {
   const [itensArquivados, setItensArquivados] = useState([]);
 
+  useEffect(() => {
+    document.title = "Recoopere | Itens Devolvidos";
+    carregarArquivados();
+  }, [usuario.id]);
+
   const carregarArquivados = async () => {
     try {
-      // No backend, a rota /itens traz ativos. Precisamos de uma que traga devolvidos ou filtrar.
-      // Por simplicidade, vamos usar o GET /itens e filtrar no front (ou ajustar backend se preferir)
-      // Mas o backend atual filtra por "ativo". Vou precisar de uma rota no backend para o arquivo.
       const resposta = await axios.get('http://127.0.0.1:8000/itens-arquivados'); 
       const filtrados = resposta.data.filter(item => item.dono_id === usuario.id);
       setItensArquivados(filtrados);
@@ -29,10 +31,6 @@ function Arquivados({ usuario }) {
       console.error("Erro ao carregar itens arquivados", erro);
     }
   };
-
-  useEffect(() => {
-    carregarArquivados();
-  }, [usuario.id]);
 
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { 
   Box, 
@@ -17,8 +17,13 @@ function Login({ onLoginSucesso, onIrParaCadastro }) {
   const [senha, setSenha] = useState('');
   const [mensagem, setMensagem] = useState({ tipo: '', texto: '' });
 
+  useEffect(() => {
+    document.title = "Recoopere | Login";
+  }, []);
+
   const fazerLogin = async (e) => {
     e.preventDefault();
+    setMensagem({ tipo: '', texto: '' });
     
     try {
       const resposta = await axios.post('http://127.0.0.1:8000/login', {
@@ -31,7 +36,7 @@ function Login({ onLoginSucesso, onIrParaCadastro }) {
       if (erro.response) {
         setMensagem({ tipo: 'error', texto: erro.response.data.detail });
       } else {
-        setMensagem({ tipo: 'error', texto: "Erro de conexão com o servidor." });
+        setMensagem({ tipo: 'error', texto: "Erro de conexão com o servidor. O backend está rodando?" });
       }
     }
   };
@@ -60,8 +65,8 @@ function Login({ onLoginSucesso, onIrParaCadastro }) {
           <Avatar sx={{ m: 1, bgcolor: 'primary.main' }}>
             <LockOutlinedIcon />
           </Avatar>
-          <Typography component="h1" variant="h5" sx={{ mb: 3 }}>
-            Acesso ao Sistema
+          <Typography component="h1" variant="h5" sx={{ mb: 3, fontWeight: 700 }}>
+            Acesso ao Recoopere
           </Typography>
 
           {mensagem.texto && (
@@ -99,7 +104,7 @@ function Login({ onLoginSucesso, onIrParaCadastro }) {
               type="submit"
               fullWidth
               variant="contained"
-              sx={{ mt: 3, mb: 2, py: 1.5, fontSize: '1rem' }}
+              sx={{ mt: 3, mb: 2, py: 1.5, fontSize: '1rem', fontWeight: 700 }}
             >
               Entrar
             </Button>
@@ -107,14 +112,14 @@ function Login({ onLoginSucesso, onIrParaCadastro }) {
               fullWidth
               variant="outlined"
               onClick={onIrParaCadastro}
-              sx={{ py: 1.2 }}
+              sx={{ py: 1.2, fontWeight: 600 }}
             >
               Criar nova conta
             </Button>
           </Box>
         </Paper>
         <Typography variant="body2" color="text.secondary" align="center" sx={{ mt: 4 }}>
-          {'Achados e Perdidos UFMG © '}
+          {'Recoopere © '}
           {new Date().getFullYear()}
         </Typography>
       </Box>

@@ -36,7 +36,6 @@ function MeusAnuncios({ usuario, onVerDetalhes }) {
   const [chatAberto, setChatAberto] = useState(null);
   const [editandoItem, setEditandoItem] = useState(null);
 
-  // Estados do formulário de edição
   const [titulo, setTitulo] = useState('');
   const [descricao, setDescricao] = useState('');
   const [categoria, setCategoria] = useState('Outros');
@@ -44,6 +43,11 @@ function MeusAnuncios({ usuario, onVerDetalhes }) {
   const [imagem, setImagem] = useState(null);
 
   const categorias = ['Eletrônicos', 'Documentos', 'Roupas', 'Outros'];
+
+  useEffect(() => {
+    document.title = "Recoopere | Meus Anúncios";
+    carregarMeusItens();
+  }, [usuario.id]);
 
   const carregarMeusItens = async () => {
     try {
@@ -85,10 +89,6 @@ function MeusAnuncios({ usuario, onVerDetalhes }) {
     }
   };
 
-  useEffect(() => {
-    carregarMeusItens();
-  }, [usuario.id]);
-
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
       <Typography variant="h4" sx={{ mb: 4, fontWeight: '800', color: 'primary.main' }}>
@@ -116,7 +116,7 @@ function MeusAnuncios({ usuario, onVerDetalhes }) {
                       <EditIcon fontSize="small" />
                     </IconButton>
                   </Box>
-                  <Button size="small" fullWidth variant="outlined" sx={{ mb: 2 }} onClick={() => onVerDetalhes(item.id)}>
+                  <Button size="small" fullWidth variant="outlined" sx={{ mb: 2, fontWeight: 700 }} onClick={() => onVerDetalhes(item.id)}>
                     Ver Detalhes do Anúncio
                   </Button>
                   <Divider sx={{ mb: 2 }} />
@@ -160,7 +160,6 @@ function MeusAnuncios({ usuario, onVerDetalhes }) {
         </Grid>
       )}
 
-      {/* DIALOG DO CHAT */}
       <Dialog open={Boolean(chatAberto)} onClose={() => setChatAberto(null)} fullWidth maxWidth="xs">
         <DialogTitle sx={{ fontWeight: '800' }}>Conversa com {chatAberto?.outroUsuarioNome}</DialogTitle>
         <DialogContent sx={{ p: 0 }}>
@@ -175,7 +174,6 @@ function MeusAnuncios({ usuario, onVerDetalhes }) {
         </DialogContent>
       </Dialog>
 
-      {/* DIALOG DE EDIÇÃO */}
       <Dialog open={Boolean(editandoItem)} onClose={() => setEditandoItem(null)} fullWidth maxWidth="sm">
         <DialogTitle sx={{ fontWeight: '800' }}>✏️ Editar Anúncio</DialogTitle>
         <DialogContent>
@@ -191,7 +189,7 @@ function MeusAnuncios({ usuario, onVerDetalhes }) {
                 Trocar Foto (Opcional)
                 <input type="file" hidden accept="image/*" onChange={(e) => setImagem(e.target.files[0])} />
               </Button>
-              <Button type="submit" fullWidth variant="contained" size="large" sx={{ borderRadius: 2 }}>Salvar Alterações</Button>
+              <Button type="submit" fullWidth variant="contained" size="large" sx={{ borderRadius: 2, fontWeight: 700 }}>Salvar Alterações</Button>
             </Stack>
           </Box>
         </DialogContent>

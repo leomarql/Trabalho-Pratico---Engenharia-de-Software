@@ -26,7 +26,6 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import SearchIcon from '@mui/icons-material/Search';
-import FilterListIcon from '@mui/icons-material/FilterList';
 import PanToolIcon from '@mui/icons-material/PanTool';
 
 import CadastroItem from './CadastroItem';
@@ -39,6 +38,11 @@ function Mural({ usuario, onVerDetalhes }) {
   const [openDialog, setOpenDialog] = useState(false);
 
   const categorias = ['Todos', 'Eletrônicos', 'Documentos', 'Roupas', 'Outros'];
+
+  useEffect(() => {
+    document.title = "Recoopere | Mural";
+    carregarItens();
+  }, []);
 
   const carregarItens = async () => {
     try {
@@ -60,6 +64,17 @@ function Mural({ usuario, onVerDetalhes }) {
     setItensFiltrados(filtrados);
   }, [busca, categoriaFiltro, itens]);
 
+  const reivindicarItem = async (itemId) => {
+    if (!window.confirm("Você acredita que este item é seu?")) return;
+    try {
+      await axios.patch(`http://127.0.0.1:8000/itens/${itemId}/reivindicar?usuario_id=${usuario.id}`);
+      alert("Item reivindicado! Vá em 'Minhas Conversas' no botão azul abaixo para falar com o anunciante.");
+      carregarItens();
+    } catch (erro) {
+      alert("Erro: " + (erro.response?.data?.detail || "Erro desconhecido"));
+    }
+  };
+
   const deletarItem = async (itemId) => {
     if (!window.confirm("Tem certeza que deseja excluir este anúncio?")) return;
     try {
@@ -70,12 +85,8 @@ function Mural({ usuario, onVerDetalhes }) {
     }
   };
 
-  useEffect(() => {
-    carregarItens();
-  }, []);
-
   return (
-    <Box sx={{ flexGrow: 1, bgcolor: 'background.default', pb: 8 }}>
+    <Box sx={{ flexGrow: 1, bgcolor: 'background.default', pb: 8, pt: 2 }}>
       <Container maxWidth="lg">
         <Typography variant="h4" sx={{ mb: 4, fontWeight: '800', color: 'primary.main' }}>
           Mural de Achados e Perdidos
@@ -140,6 +151,17 @@ function Mural({ usuario, onVerDetalhes }) {
                 </CardActionArea>
 
                 <CardActions sx={{ px: 2, pb: 2 }}>
+                  {usuario.id !== item.dono_id && (
+                    <Button 
+                      size="small" 
+                      color="warning" 
+                      variant="contained" 
+                      onClick={() => reivindicarItem(item.id)}
+                      sx={{ borderRadius: 2, fontWeight: 700 }}
+                    >
+                      É MEU!
+                    </Button>
+                  )}
                   <Button size="small" onClick={() => onVerDetalhes(item.id)}>Ver Detalhes</Button>
                   <Box sx={{ flexGrow: 1 }} />
                   {(usuario.is_admin || usuario.id === item.dono_id) && (

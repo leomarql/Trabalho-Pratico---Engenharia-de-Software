@@ -35,6 +35,7 @@ function Home({ onComeçar }) {
   const [activeSlide, setActiveSlide] = useState(0);
 
   useEffect(() => {
+    document.title = "Recoopere | Início";
     const timer = setInterval(() => {
       setActiveSlide((prev) => (prev + 1) % slides.length);
     }, 5000);
@@ -66,7 +67,7 @@ function Home({ onComeçar }) {
               O Recoopere é a plataforma oficial de achados e perdidos para a comunidade acadêmica. 
               Conectamos quem encontrou com quem perdeu de forma rápida e segura.
             </Typography>
-            <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+            <Box sx={{ display: 'flex', justifyContent: 'center', mb: 4 }}>
               <Button 
                 variant="contained" 
                 size="large" 
@@ -78,9 +79,9 @@ function Home({ onComeçar }) {
             </Box>
           </Grid>
 
-          {/* Carrossel Centralizado */}
-          <Grid item xs={12} sx={{ width: '100%', maxWidth: 600 }}>
-            <Box sx={{ minHeight: 400, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          {/* Carrossel Centralizado e mais largo */}
+          <Grid item xs={12} sx={{ width: '100%', maxWidth: 850, display: 'flex', justifyContent: 'center' }}>
+            <Box sx={{ width: '100%', minHeight: 400, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <Fade in={true} key={activeSlide} timeout={1000}>
                 <Paper 
                   elevation={0} 
