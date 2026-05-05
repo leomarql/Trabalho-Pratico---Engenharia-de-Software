@@ -20,6 +20,7 @@ class Item(Base):
     descricao = Column(String)
     categoria = Column(String)
     local_encontrado = Column(String)
+    data_encontrado = Column(DateTime(timezone=True), nullable=True) # Quando o item foi achado
     status = Column(String, default="ativo")
     imagem_url = Column(String, nullable=True)
     

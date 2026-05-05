@@ -9,7 +9,8 @@ import {
   Menu,
   MenuItem,
   Tooltip,
-  Container
+  Container,
+  Divider
 } from '@mui/material';
 import { useState } from 'react';
 import LogoutIcon from '@mui/icons-material/Logout';
@@ -64,7 +65,7 @@ function Header({
                 fontWeight: 800, 
                 letterSpacing: '-0.5px',
                 display: { xs: 'none', sm: 'block' },
-                color: 'primary.main'
+                color: '#00529b' // Azul fixo para o nome
               }}
             >
               Recoopere
@@ -116,7 +117,7 @@ function Header({
                     color="inherit"
                   >
                     <Avatar sx={{ width: 32, height: 32, bgcolor: 'secondary.main', color: 'primary.main', fontWeight: 700, fontSize: '0.9rem' }}>
-                      {usuario.nome.charAt(0).toUpperCase()}
+                      {usuario?.nome ? usuario.nome.charAt(0).toUpperCase() : 'U'}
                     </Avatar>
                   </IconButton>
                   <Menu

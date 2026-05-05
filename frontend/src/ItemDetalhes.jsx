@@ -9,12 +9,14 @@ import {
   Chip, 
   Button, 
   Divider,
-  Avatar,
   Stack
 } from '@mui/material';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import PanToolIcon from '@mui/icons-material/PanTool';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import dayjs from 'dayjs';
 
 function ItemDetalhes({ itemId, usuario, onVoltar }) {
   const [item, setItem] = useState(null);
@@ -36,6 +38,17 @@ function ItemDetalhes({ itemId, usuario, onVoltar }) {
       carregarItem();
     } catch (erro) {
       alert("Erro: " + (erro.response?.data?.detail || "Erro desconhecido"));
+    }
+  };
+
+  const marcarDevolvido = async () => {
+    if (!window.confirm("Deseja marcar este item como devolvido?")) return;
+    try {
+      await axios.patch(`http://127.0.0.1:8000/itens/${itemId}/devolver?usuario_id=${usuario.id}`);
+      alert("Item devolvido!");
+      onVoltar(); // Volta ao mural já que o item some
+    } catch (erro) {
+      alert("Erro ao marcar como devolvido");
     }
   };
 
@@ -74,10 +87,20 @@ function ItemDetalhes({ itemId, usuario, onVoltar }) {
               <Chip label={item.categoria} color="primary" sx={{ mb: 2, fontWeight: 700 }} />
               <Typography variant="h3" sx={{ fontWeight: 800, mb: 1 }}>{item.titulo}</Typography>
               
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 3, color: 'text.secondary' }}>
-                <LocationOnIcon sx={{ mr: 0.5, color: 'secondary.main' }} />
-                <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>{item.local_encontrado}</Typography>
-              </Box>
+              <Stack spacing={1} sx={{ mb: 3 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', color: 'text.secondary' }}>
+                  <LocationOnIcon sx={{ mr: 0.5, color: 'secondary.main' }} />
+                  <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>{item.local_encontrado}</Typography>
+                </Box>
+                {item.data_encontrado && (
+                  <Box sx={{ display: 'flex', alignItems: 'center', color: 'text.secondary' }}>
+                    <CalendarMonthIcon sx={{ mr: 0.5, color: 'secondary.main' }} />
+                    <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                      Encontrado em: {dayjs(item.data_encontrado).format('DD/MM/YYYY')}
+                    </Typography>
+                  </Box>
+                )}
+              </Stack>
 
               <Typography variant="body1" sx={{ mb: 4, color: 'text.secondary', lineHeight: 1.8 }}>
                 {item.descricao}
@@ -97,20 +120,36 @@ function ItemDetalhes({ itemId, usuario, onVoltar }) {
                 </Typography>
               </Stack>
 
-              {usuario.id !== item.dono_id && (
-                <Button 
-                  fullWidth 
-                  variant="contained" 
-                  size="large" 
-                  color={jaReivindicadoPorMim ? "success" : "warning"}
-                  startIcon={<PanToolIcon />}
-                  disabled={jaReivindicadoPorMim}
-                  onClick={reivindicarItem}
-                  sx={{ py: 2, borderRadius: 3, fontWeight: 800 }}
-                >
-                  {jaReivindicadoPorMim ? "Item Reivindicado" : "Este item é meu!"}
-                </Button>
-              )}
+              <Stack spacing={2}>
+                {usuario.id !== item.dono_id && (
+                  <Button 
+                    fullWidth 
+                    variant="contained" 
+                    size="large" 
+                    color={jaReivindicadoPorMim ? "success" : "warning"}
+                    startIcon={<PanToolIcon />}
+                    disabled={jaReivindicadoPorMim}
+                    onClick={reivindicarItem}
+                    sx={{ py: 2, borderRadius: 3, fontWeight: 800 }}
+                  >
+                    {jaReivindicadoPorMim ? "Item Reivindicado" : "Este item é meu!"}
+                  </Button>
+                )}
+
+                {usuario.id === item.dono_id && (
+                  <Button 
+                    fullWidth 
+                    variant="contained" 
+                    size="large" 
+                    color="success"
+                    startIcon={<CheckCircleIcon />}
+                    onClick={marcarDevolvido}
+                    sx={{ py: 2, borderRadius: 3, fontWeight: 800 }}
+                  >
+                    Marcar como Devolvido
+                  </Button>
+                )}
+              </Stack>
             </Box>
           </Grid>
         </Grid>

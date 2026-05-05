@@ -6,16 +6,18 @@ import {
   TextField, 
   MenuItem, 
   Typography, 
-  Stack,
-  IconButton
+  Stack
 } from '@mui/material';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import PhotoCamera from '@mui/icons-material/PhotoCamera';
+import dayjs from 'dayjs';
 
 function CadastroItem({ usuario, onSucesso }) {
   const [titulo, setTitulo] = useState('');
   const [descricao, setDescricao] = useState('');
   const [categoria, setCategoria] = useState('Outros');
   const [local, setLocal] = useState('');
+  const [dataEncontrado, setDataEncontrado] = useState(dayjs());
   const [imagem, setImagem] = useState(null);
   const [nomeArquivo, setNomeArquivo] = useState('');
 
@@ -37,6 +39,7 @@ function CadastroItem({ usuario, onSucesso }) {
     formData.append('descricao', descricao);
     formData.append('categoria', categoria);
     formData.append('local_encontrado', local);
+    formData.append('data_encontrado', dataEncontrado ? dataEncontrado.toISOString() : '');
     formData.append('dono_id', usuario.id);
     if (imagem) {
       formData.append('imagem', imagem);
@@ -48,7 +51,7 @@ function CadastroItem({ usuario, onSucesso }) {
           'Content-Type': 'multipart/form-data',
         },
       });
-      onSucesso(); // Recarrega o mural e fecha o dialog
+      onSucesso();
     } catch (erro) {
       alert('Erro ao cadastrar item: ' + (erro.response?.data?.detail || erro.message));
     }
@@ -75,19 +78,28 @@ function CadastroItem({ usuario, onSucesso }) {
           onChange={(e) => setDescricao(e.target.value)}
         />
 
-        <TextField
-          select
-          label="Categoria"
-          fullWidth
-          value={categoria}
-          onChange={(e) => setCategoria(e.target.value)}
-        >
-          {categorias.map((option) => (
-            <MenuItem key={option} value={option}>
-              {option}
-            </MenuItem>
-          ))}
-        </TextField>
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+          <TextField
+            select
+            label="Categoria"
+            fullWidth
+            value={categoria}
+            onChange={(e) => setCategoria(e.target.value)}
+          >
+            {categorias.map((option) => (
+              <MenuItem key={option} value={option}>
+                {option}
+              </MenuItem>
+            ))}
+          </TextField>
+
+          <DatePicker
+            label="Data que encontrou"
+            value={dataEncontrado}
+            onChange={(newValue) => setDataEncontrado(newValue)}
+            sx={{ width: '100%' }}
+          />
+        </Stack>
 
         <TextField
           label="Onde você encontrou?"
@@ -121,7 +133,7 @@ function CadastroItem({ usuario, onSucesso }) {
           fullWidth
           variant="contained"
           size="large"
-          sx={{ mt: 2, py: 1.5, borderRadius: 2 }}
+          sx={{ mt: 2, py: 1.5, borderRadius: 2, fontWeight: 700 }}
         >
           Publicar Anúncio
         </Button>

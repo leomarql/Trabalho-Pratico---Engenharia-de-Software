@@ -61,6 +61,7 @@ class ItemCreate(BaseModel):
     descricao: str
     categoria: str
     local_encontrado: str
+    data_encontrado: Optional[datetime] = None
     dono_id: int
 
 class ItemResponse(BaseModel):
@@ -69,6 +70,7 @@ class ItemResponse(BaseModel):
     descricao: str
     categoria: str
     local_encontrado: str
+    data_encontrado: Optional[datetime] = None
     status: str
     imagem_url: Optional[str] = None
     dono_id: int

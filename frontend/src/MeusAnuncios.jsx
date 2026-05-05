@@ -25,10 +25,12 @@ import {
   MenuItem,
   Stack
 } from '@mui/material';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import ChatIcon from '@mui/icons-material/Chat';
 import PanToolIcon from '@mui/icons-material/PanTool';
 import EditIcon from '@mui/icons-material/Edit';
 import PhotoCamera from '@mui/icons-material/PhotoCamera';
+import dayjs from 'dayjs';
 import Chat from './Chat';
 
 function MeusAnuncios({ usuario, onVerDetalhes }) {
@@ -40,6 +42,7 @@ function MeusAnuncios({ usuario, onVerDetalhes }) {
   const [descricao, setDescricao] = useState('');
   const [categoria, setCategoria] = useState('Outros');
   const [local, setLocal] = useState('');
+  const [dataEncontrado, setDataEncontrado] = useState(null);
   const [imagem, setImagem] = useState(null);
 
   const categorias = ['Eletrônicos', 'Documentos', 'Roupas', 'Outros'];
@@ -65,6 +68,7 @@ function MeusAnuncios({ usuario, onVerDetalhes }) {
     setDescricao(item.descricao);
     setCategoria(item.categoria);
     setLocal(item.local_encontrado);
+    setDataEncontrado(item.data_encontrado ? dayjs(item.data_encontrado) : null);
     setImagem(null);
   };
 
@@ -75,6 +79,7 @@ function MeusAnuncios({ usuario, onVerDetalhes }) {
     formData.append('descricao', descricao);
     formData.append('categoria', categoria);
     formData.append('local_encontrado', local);
+    formData.append('data_encontrado', dataEncontrado ? dataEncontrado.toISOString() : '');
     formData.append('usuario_id', usuario.id);
     if (imagem) formData.append('imagem', imagem);
 
@@ -181,9 +186,19 @@ function MeusAnuncios({ usuario, onVerDetalhes }) {
             <Stack spacing={3}>
               <TextField label="Título" fullWidth required value={titulo} onChange={(e) => setTitulo(e.target.value)} />
               <TextField label="Descrição" fullWidth multiline rows={3} required value={descricao} onChange={(e) => setDescricao(e.target.value)} />
-              <TextField select label="Categoria" fullWidth value={categoria} onChange={(e) => setCategoria(e.target.value)}>
-                {categorias.map(opt => <MenuItem key={opt} value={opt}>{opt}</MenuItem>)}
-              </TextField>
+              
+              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+                <TextField select label="Categoria" fullWidth value={categoria} onChange={(e) => setCategoria(e.target.value)}>
+                  {categorias.map(opt => <MenuItem key={opt} value={opt}>{opt}</MenuItem>)}
+                </TextField>
+                <DatePicker
+                  label="Data que encontrou"
+                  value={dataEncontrado}
+                  onChange={(newValue) => setDataEncontrado(newValue)}
+                  sx={{ width: '100%' }}
+                />
+              </Stack>
+
               <TextField label="Local" fullWidth required value={local} onChange={(e) => setLocal(e.target.value)} />
               <Button variant="outlined" component="label" startIcon={<PhotoCamera />}>
                 Trocar Foto (Opcional)

@@ -4,6 +4,7 @@ from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
 import shutil
 import os
+from datetime import datetime
 
 import models
 import schemas
@@ -86,6 +87,7 @@ async def criar_item(
     descricao: str = Form(...),
     categoria: str = Form(...),
     local_encontrado: str = Form(...),
+    data_encontrado: str = Form(None), # Recebe como string ISO
     dono_id: int = Form(...),
     imagem: UploadFile = File(None),
     db: Session = Depends(get_db)
@@ -96,9 +98,17 @@ async def criar_item(
         with open(caminho_imagem, "wb") as buffer:
             shutil.copyfileobj(imagem.file, buffer)
     
+    dt_obj = None
+    if data_encontrado:
+        try:
+            dt_obj = datetime.fromisoformat(data_encontrado.replace('Z', '+00:00'))
+        except:
+            pass
+
     novo_item = models.Item(
         titulo=titulo, descricao=descricao, categoria=categoria,
-        local_encontrado=local_encontrado, imagem_url=caminho_imagem, dono_id=dono_id
+        local_encontrado=local_encontrado, data_encontrado=dt_obj,
+        imagem_url=caminho_imagem, dono_id=dono_id
     )
     db.add(novo_item)
     db.commit()
@@ -180,7 +190,6 @@ def enviar_mensagem(mensagem: schemas.MensagemCreate, remetente_id: int, db: Ses
 
 @app.get("/mensagens/{item_id}", response_model=list[schemas.MensagemResponse])
 def listar_mensagens(item_id: int, usuario_id: int, outro_id: int, db: Session = Depends(get_db)):
-    # Busca mensagens trocadas APENAS entre esses dois usuários para este item
     msgs = db.query(models.Mensagem).filter(
         models.Mensagem.item_id == item_id,
         (
@@ -193,7 +202,6 @@ def listar_mensagens(item_id: int, usuario_id: int, outro_id: int, db: Session =
 
 @app.get("/meus-chats/{usuario_id}")
 def listar_meus_chats(usuario_id: int, db: Session = Depends(get_db)):
-    # Itens que o usuário anunciou e que têm reivindicações
     itens_anunciados = db.query(models.Item).filter(models.Item.dono_id == usuario_id).all()
     chats = []
     for item in itens_anunciados:
@@ -204,8 +212,6 @@ def listar_meus_chats(usuario_id: int, db: Session = Depends(get_db)):
                 "outro_usuario_nome": reiv.usuario.nome,
                 "tipo": "dono"
             })
-    
-    # Itens que o usuário reivindicou
     reivindicacoes = db.query(models.Reivindicacao).filter(models.Reivindicacao.usuario_id == usuario_id).all()
     for reiv in reivindicacoes:
         chats.append({
@@ -214,7 +220,6 @@ def listar_meus_chats(usuario_id: int, db: Session = Depends(get_db)):
             "outro_usuario_nome": db.query(models.Usuario).filter(models.Usuario.id == reiv.item.dono_id).first().nome,
             "tipo": "reclamante"
         })
-    
     return chats
 
 @app.delete("/itens/{item_id}", status_code=status.HTTP_200_OK)
@@ -245,6 +250,7 @@ def editar_item(
     descricao: str = Form(...),
     categoria: str = Form(...),
     local_encontrado: str = Form(...),
+    data_encontrado: str = Form(None),
     imagem: UploadFile = File(None),
     db: Session = Depends(get_db)
 ):
@@ -256,6 +262,12 @@ def editar_item(
     item.descricao = descricao
     item.categoria = categoria
     item.local_encontrado = local_encontrado
+    
+    if data_encontrado:
+        try:
+            item.data_encontrado = datetime.fromisoformat(data_encontrado.replace('Z', '+00:00'))
+        except:
+            pass
 
     if imagem:
         caminho_imagem = f"{UPLOAD_DIR}/{imagem.filename}"
@@ -270,4 +282,3 @@ def editar_item(
         "total_reivindicacoes": len(item.reivindicacoes),
         "reivindicacoes": []
     }
-
