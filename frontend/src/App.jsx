@@ -1,31 +1,52 @@
 import { useState } from 'react';
+import { createTheme, ThemeProvider, CssBaseline } from '@mui/material';
 import Login from './Login';
 import Cadastro from './Cadastro';
 import Mural from './Mural';
 
+// Configuração do Tema Material You (Material Design 3)
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: '#6750A4', // Cor clássica do Material M3
+    },
+    secondary: {
+      main: '#625B71',
+    },
+    background: {
+      default: '#FEF7FF', // Fundo levemente colorido conforme o M3
+    },
+  },
+  shape: {
+    borderRadius: 16, // Bordas bem arredondadas (característica do Material You)
+  },
+  typography: {
+    fontFamily: '"Roboto", "Inter", sans-serif',
+  },
+});
+
 function App() {
-  // Esse estado guarda quem está usando o sistema. Começa "vazio" (null)
   const [usuarioLogado, setUsuarioLogado] = useState(null);
-  // Alterna entre login e cadastro quando ainda não há sessão
   const [telaAuth, setTelaAuth] = useState('login');
 
   return (
-    <div>
-      {/* Se NÃO tiver usuário logado, mostra Login ou Cadastro */}
-      {!usuarioLogado ? (
-        telaAuth === 'login' ? (
-          <Login
-            onLoginSucesso={(dadosUsuario) => setUsuarioLogado(dadosUsuario)}
-            onIrParaCadastro={() => setTelaAuth('cadastro')}
-          />
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <div>
+        {!usuarioLogado ? (
+          telaAuth === 'login' ? (
+            <Login
+              onLoginSucesso={(dadosUsuario) => setUsuarioLogado(dadosUsuario)}
+              onIrParaCadastro={() => setTelaAuth('cadastro')}
+            />
+          ) : (
+            <Cadastro onVoltarLogin={() => setTelaAuth('login')} />
+          )
         ) : (
-          <Cadastro onVoltarLogin={() => setTelaAuth('login')} />
-        )
-      ) : (
-        /* Se TIVER usuário logado, mostra a tela do Mural e passa os dados pra ele */
-        <Mural usuario={usuarioLogado} />
-      )}
-    </div>
+          <Mural usuario={usuarioLogado} />
+        )}
+      </div>
+    </ThemeProvider>
   );
 }
 
