@@ -21,7 +21,7 @@ function Chat({ item, usuario, destinatarioId, onVerItem }) {
 
   const carregarMensagens = async () => {
     try {
-      const resposta = await axios.get(`http://127.0.0.1:8000/mensagens/${item.id}`);
+      const resposta = await axios.get(`http://127.0.0.1:8000/mensagens/${item.id}?usuario_id=${usuario.id}&outro_id=${destinatarioId}`);
       setMensagens(resposta.data);
     } catch (erro) {
       console.error("Erro ao carregar chat", erro);

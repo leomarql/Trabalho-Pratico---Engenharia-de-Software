@@ -167,8 +167,16 @@ def enviar_mensagem(mensagem: schemas.MensagemCreate, remetente_id: int, db: Ses
     return {**nova_msg.__dict__, "remetente_nome": nova_msg.remetente.nome}
 
 @app.get("/mensagens/{item_id}", response_model=list[schemas.MensagemResponse])
-def listar_mensagens(item_id: int, db: Session = Depends(get_db)):
-    msgs = db.query(models.Mensagem).filter(models.Mensagem.item_id == item_id).order_by(models.Mensagem.data_envio.asc()).all()
+def listar_mensagens(item_id: int, usuario_id: int, outro_id: int, db: Session = Depends(get_db)):
+    # Busca mensagens trocadas APENAS entre esses dois usuários para este item
+    msgs = db.query(models.Mensagem).filter(
+        models.Mensagem.item_id == item_id,
+        (
+            (models.Mensagem.remetente_id == usuario_id) & (models.Mensagem.destinatario_id == outro_id) |
+            (models.Mensagem.remetente_id == outro_id) & (models.Mensagem.destinatario_id == usuario_id)
+        )
+    ).order_by(models.Mensagem.data_envio.asc()).all()
+    
     return [{**m.__dict__, "remetente_nome": m.remetente.nome} for m in msgs]
 
 @app.get("/meus-chats/{usuario_id}")
