@@ -1,4 +1,6 @@
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, DateTime
+from sqlalchemy.orm import relationship
+from sqlalchemy.sql import func
 from database import Base
 
 class Usuario(Base):
@@ -8,7 +10,8 @@ class Usuario(Base):
     nome = Column(String, index=True)
     email = Column(String, unique=True, index=True)
     senha = Column(String)
-    is_admin = Column(Boolean, default=False) # Necessário para a História 6
+    is_admin = Column(Boolean, default=False)
+    imagem_url = Column(String, nullable=True) # Foto de perfil
 
 class Item(Base):
     __tablename__ = "itens"
@@ -16,10 +19,37 @@ class Item(Base):
     id = Column(Integer, primary_key=True, index=True)
     titulo = Column(String, index=True)
     descricao = Column(String)
-    categoria = Column(String) # Ex: "Eletrônicos", "Documentos", "Roupas"
+    categoria = Column(String)
     local_encontrado = Column(String)
-    status = Column(String, default="ativo") # Pode ser "ativo", "devolvido" ou "removido"
-    imagem_url = Column(String, nullable=True) # Campo para a foto do item
+    data_encontrado = Column(DateTime(timezone=True), nullable=True)
+    status = Column(String, default="ativo")
+    imagem_url = Column(String, nullable=True)
     
-    # Isso cria a relação com a tabela de usuários (quem postou o anúncio)
     dono_id = Column(Integer, ForeignKey("usuarios.id"))
+    
+    reivindicacoes = relationship("Reivindicacao", back_populates="item")
+
+class Reivindicacao(Base):
+    __tablename__ = "reivindicacoes"
+
+    id = Column(Integer, primary_key=True, index=True)
+    item_id = Column(Integer, ForeignKey("itens.id"))
+    usuario_id = Column(Integer, ForeignKey("usuarios.id"))
+    data_reivindicacao = Column(DateTime(timezone=True), server_default=func.now())
+
+    item = relationship("Item", back_populates="reivindicacoes")
+    usuario = relationship("Usuario")
+
+class Mensagem(Base):
+    __tablename__ = "mensagens"
+
+    id = Column(Integer, primary_key=True, index=True)
+    conteudo = Column(String)
+    data_envio = Column(DateTime(timezone=True), server_default=func.now())
+    
+    item_id = Column(Integer, ForeignKey("itens.id"))
+    remetente_id = Column(Integer, ForeignKey("usuarios.id"))
+    destinatario_id = Column(Integer, ForeignKey("usuarios.id"))
+
+    remetente = relationship("Usuario", foreign_keys=[remetente_id])
+    destinatario = relationship("Usuario", foreign_keys=[destinatario_id])

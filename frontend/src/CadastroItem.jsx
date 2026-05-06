@@ -1,22 +1,45 @@
 import { useState } from 'react';
 import axios from 'axios';
+import { 
+  Box, 
+  Button, 
+  TextField, 
+  MenuItem, 
+  Typography, 
+  Stack
+} from '@mui/material';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import PhotoCamera from '@mui/icons-material/PhotoCamera';
+import dayjs from 'dayjs';
 
 function CadastroItem({ usuario, onSucesso }) {
   const [titulo, setTitulo] = useState('');
   const [descricao, setDescricao] = useState('');
   const [categoria, setCategoria] = useState('Outros');
   const [local, setLocal] = useState('');
+  const [dataEncontrado, setDataEncontrado] = useState(dayjs());
   const [imagem, setImagem] = useState(null);
+  const [nomeArquivo, setNomeArquivo] = useState('');
+
+  const categorias = ['Eletrônicos', 'Documentos', 'Roupas', 'Outros'];
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImagem(file);
+      setNomeArquivo(file.name);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // FormData é necessário para enviar arquivos (fotos) para o servidor
     const formData = new FormData();
     formData.append('titulo', titulo);
     formData.append('descricao', descricao);
     formData.append('categoria', categoria);
     formData.append('local_encontrado', local);
+    formData.append('data_encontrado', dataEncontrado ? dataEncontrado.toISOString() : '');
     formData.append('dono_id', usuario.id);
     if (imagem) {
       formData.append('imagem', imagem);
@@ -28,48 +51,95 @@ function CadastroItem({ usuario, onSucesso }) {
           'Content-Type': 'multipart/form-data',
         },
       });
-      alert('Item cadastrado com sucesso!');
-      onSucesso(); // Recarrega o mural
-      // Limpa o formulário
-      setTitulo('');
-      setDescricao('');
-      setLocal('');
-      setImagem(null);
+      onSucesso();
     } catch (erro) {
-      alert('Erro ao cadastrar item: ' + erro.response?.data?.detail || erro.message);
+      alert('Erro ao cadastrar item: ' + (erro.response?.data?.detail || erro.message));
     }
   };
 
   return (
-    <div style={{ padding: '20px', border: '1px solid #ddd', borderRadius: '8px', marginBottom: '20px', backgroundColor: '#fff' }}>
-      <h3>📢 Anunciar Item Encontrado</h3>
-      <form onSubmit={handleSubmit}>
-        <input type="text" placeholder="O que você encontrou?" value={titulo} onChange={(e) => setTitulo(e.target.value)} required style={styles.input} />
-        <textarea placeholder="Descrição (cor, marca, detalhes...)" value={descricao} onChange={(e) => setDescricao(e.target.value)} required style={styles.input} />
+    <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
+      <Stack spacing={2}>
+        <TextField
+          label="O que você encontrou?"
+          fullWidth
+          required
+          value={titulo}
+          onChange={(e) => setTitulo(e.target.value)}
+        />
         
-        <select value={categoria} onChange={(e) => setCategoria(e.target.value)} style={styles.input}>
-          <option value="Eletrônicos">Eletrônicos</option>
-          <option value="Documentos">Documentos</option>
-          <option value="Roupas">Roupas</option>
-          <option value="Outros">Outros</option>
-        </select>
+        <TextField
+          label="Descrição detalhada"
+          fullWidth
+          multiline
+          rows={3}
+          required
+          value={descricao}
+          onChange={(e) => setDescricao(e.target.value)}
+        />
 
-        <input type="text" placeholder="Onde você encontrou?" value={local} onChange={(e) => setLocal(e.target.value)} required style={styles.input} />
-        
-        <div style={{ marginBottom: '10px' }}>
-          <label><strong>Foto do Item:</strong></label><br />
-          <input type="file" accept="image/*" onChange={(e) => setImagem(e.target.files[0])} style={{ marginTop: '5px' }} />
-        </div>
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+          <TextField
+            select
+            label="Categoria"
+            fullWidth
+            value={categoria}
+            onChange={(e) => setCategoria(e.target.value)}
+          >
+            {categorias.map((option) => (
+              <MenuItem key={option} value={option}>
+                {option}
+              </MenuItem>
+            ))}
+          </TextField>
 
-        <button type="submit" style={styles.botao}>Publicar Anúncio</button>
-      </form>
-    </div>
+          <DatePicker
+            label="Data que encontrou"
+            value={dataEncontrado}
+            onChange={(newValue) => setDataEncontrado(newValue)}
+            sx={{ width: '100%' }}
+          />
+        </Stack>
+
+        <TextField
+          label="Onde você encontrou?"
+          fullWidth
+          required
+          value={local}
+          onChange={(e) => setLocal(e.target.value)}
+        />
+
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, p: 1, border: '1px dashed #ccc', borderRadius: 2 }}>
+          <Button
+            variant="outlined"
+            component="label"
+            startIcon={<PhotoCamera />}
+          >
+            Anexar Foto
+            <input
+              type="file"
+              hidden
+              accept="image/*"
+              onChange={handleFileChange}
+            />
+          </Button>
+          <Typography variant="caption" color="text.secondary">
+            {nomeArquivo || 'Nenhuma foto selecionada'}
+          </Typography>
+        </Box>
+
+        <Button
+          type="submit"
+          fullWidth
+          variant="contained"
+          size="large"
+          sx={{ mt: 2, py: 1.5, borderRadius: 2, fontWeight: 700 }}
+        >
+          Publicar Anúncio
+        </Button>
+      </Stack>
+    </Box>
   );
 }
-
-const styles = {
-  input: { display: 'block', width: '100%', padding: '8px', marginBottom: '10px', borderRadius: '4px', border: '1px solid #ccc' },
-  botao: { backgroundColor: '#007bff', color: 'white', padding: '10px', border: 'none', borderRadius: '4px', cursor: 'pointer', width: '100%' }
-};
 
 export default CadastroItem;

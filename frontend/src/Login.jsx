@@ -1,77 +1,136 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { 
+  Box, 
+  Button, 
+  TextField, 
+  Typography, 
+  Container, 
+  Paper, 
+  Alert,
+  Avatar
+} from '@mui/material';
+import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 
 function Login({ onLoginSucesso, onIrParaCadastro }) {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
-  const [mensagem, setMensagem] = useState('');
+  const [mensagem, setMensagem] = useState({ tipo: '', texto: '' });
+
+  useEffect(() => {
+    document.title = "Recoopere | Login";
+  }, []);
 
   const fazerLogin = async (e) => {
-    e.preventDefault(); // Evita que a página recarregue ao enviar o formulário
+    e.preventDefault();
+    setMensagem({ tipo: '', texto: '' });
     
     try {
-      // Fazendo a requisição POST para a sua API Python
       const resposta = await axios.post('http://127.0.0.1:8000/login', {
         email: email,
         senha: senha
       });
       
-      // Se der certo (Código 200)
-      setMensagem(`✅ ${resposta.data.mensagem} Bem-vindo, ${resposta.data.nome}!`);
-
-      // Avisa ao App que o login deu certo e manda os dados do usuário (id, nome, is_admin)
       onLoginSucesso(resposta.data);
     } catch (erro) {
-      // Se der erro (Código 401 - Senha incorreta)
       if (erro.response) {
-        setMensagem(`❌ Erro: ${erro.response.data.detail}`);
+        setMensagem({ tipo: 'error', texto: erro.response.data.detail });
       } else {
-        setMensagem("❌ Erro de conexão com o servidor.");
+        setMensagem({ tipo: 'error', texto: "Erro de conexão com o servidor. O backend está rodando?" });
       }
     }
   };
 
   return (
-    <div style={{ padding: '50px', fontFamily: 'sans-serif' }}>
-      <h2>Login - Achados e Perdidos UFMG</h2>
-      
-      <form onSubmit={fazerLogin} style={{ display: 'flex', flexDirection: 'column', width: '300px' }}>
-        <label>E-mail Acadêmico:</label>
-        <input 
-          type="email" 
-          value={email} 
-          onChange={(e) => setEmail(e.target.value)} 
-          placeholder="seu@ufmg.br"
-          required
-          style={{ marginBottom: '10px', padding: '8px' }}
-        />
-
-        <label>Senha:</label>
-        <input 
-          type="password" 
-          value={senha} 
-          onChange={(e) => setSenha(e.target.value)} 
-          placeholder="Sua senha"
-          required
-          style={{ marginBottom: '20px', padding: '8px' }}
-        />
-
-        <button type="submit" style={{ padding: '10px', backgroundColor: '#00529b', color: 'white', border: 'none', cursor: 'pointer' }}>
-          Entrar
-        </button>
-      </form>
-
-      <button
-        type="button"
-        onClick={onIrParaCadastro}
-        style={{ marginTop: '16px', padding: '8px 12px', cursor: 'pointer', background: 'transparent', border: '1px solid #00529b', color: '#00529b' }}
+    <Container component="main" maxWidth="xs">
+      <Box
+        sx={{
+          marginTop: 8,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+        }}
       >
-        Criar nova conta
-      </button>
+        <Paper 
+          elevation={3} 
+          sx={{ 
+            padding: 4, 
+            display: 'flex', 
+            flexDirection: 'column', 
+            alignItems: 'center',
+            width: '100%',
+            borderRadius: 4
+          }}
+        >
+          <Avatar sx={{ m: 1, bgcolor: 'primary.main' }}>
+            <LockOutlinedIcon />
+          </Avatar>
+          <Typography component="h1" variant="h5" sx={{ mb: 3, fontWeight: 700 }}>
+            Acesso ao Recoopere
+          </Typography>
 
-      {/* Exibe a mensagem de sucesso ou erro aqui */}
-      {mensagem && <p style={{ marginTop: '20px', fontWeight: 'bold' }}>{mensagem}</p>}
-    </div>
+          {mensagem.texto && (
+            <Alert severity={mensagem.tipo} sx={{ width: '100%', mb: 2 }}>
+              {mensagem.texto}
+            </Alert>
+          )}
+
+          <Box component="form" onSubmit={fazerLogin} noValidate sx={{ mt: 1, width: '100%' }}>
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              id="email"
+              label="E-mail Acadêmico (@ufmg.br)"
+              name="email"
+              autoComplete="email"
+              autoFocus
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              name="password"
+              label="Senha"
+              type="password"
+              id="password"
+              autoComplete="current-password"
+              value={senha}
+              onChange={(e) => setSenha(e.target.value)}
+            />
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              sx={{ mt: 3, mb: 2, py: 1.5, fontSize: '1rem', fontWeight: 700 }}
+            >
+              Entrar
+            </Button>
+            <Button
+              fullWidth
+              variant="contained"
+              onClick={onIrParaCadastro}
+              sx={{ 
+                py: 1.5, 
+                fontWeight: 800, 
+                bgcolor: (theme) => theme.palette.tokens.primaryContainer, 
+                color: (theme) => theme.palette.tokens.onPrimaryContainer,
+                boxShadow: 'none',
+                '&:hover': { bgcolor: (theme) => theme.palette.tokens.primaryContainer, filter: 'brightness(0.9)' }
+              }}
+            >
+              Criar nova conta
+            </Button>
+          </Box>
+        </Paper>
+        <Typography variant="body2" color="text.secondary" align="center" sx={{ mt: 4 }}>
+          {'Recoopere © '}
+          {new Date().getFullYear()}
+        </Typography>
+      </Box>
+    </Container>
   );
 }
 

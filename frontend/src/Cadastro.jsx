@@ -1,5 +1,18 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { 
+  Box, 
+  Button, 
+  TextField, 
+  Typography, 
+  Container, 
+  Paper, 
+  Alert,
+  Avatar,
+  IconButton
+} from '@mui/material';
+import PersonAddOutlinedIcon from '@mui/icons-material/PersonAddOutlined';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 function detalheErro(erro) {
   if (!erro.response?.data) return 'Erro de conexão com o servidor.';
@@ -13,11 +26,15 @@ function Cadastro({ onVoltarLogin }) {
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
-  const [mensagem, setMensagem] = useState('');
+  const [mensagem, setMensagem] = useState({ tipo: '', texto: '' });
+
+  useEffect(() => {
+    document.title = "Recoopere | Cadastro";
+  }, []);
 
   const cadastrar = async (e) => {
     e.preventDefault();
-    setMensagem('');
+    setMensagem({ tipo: '', texto: '' });
 
     try {
       await axios.post('http://127.0.0.1:8000/usuarios', {
@@ -25,68 +42,55 @@ function Cadastro({ onVoltarLogin }) {
         email,
         senha,
       });
-      setMensagem('✅ Conta criada! Você já pode entrar com seu e-mail e senha.');
+      setMensagem({ tipo: 'success', texto: 'Conta criada! Você já pode entrar com seu e-mail e senha.' });
       setNome('');
       setEmail('');
       setSenha('');
     } catch (erro) {
-      setMensagem(`❌ ${detalheErro(erro)}`);
+      setMensagem({ tipo: 'error', texto: detalheErro(erro) });
     }
   };
 
   return (
-    <div style={{ padding: '50px', fontFamily: 'sans-serif' }}>
-      <h2>Criar conta - Achados e Perdidos UFMG</h2>
-      <p style={{ maxWidth: '400px', color: '#444' }}>
-        Use um e-mail que termine com <strong>@ufmg.br</strong>.
-      </p>
+    <Container component="main" maxWidth="xs">
+      <Box sx={{ marginTop: 8, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <Paper elevation={3} sx={{ padding: 4, display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', borderRadius: 4 }}>
+          <Box sx={{ alignSelf: 'flex-start', mb: 1 }}>
+             <IconButton onClick={onVoltarLogin} color="primary" size="small">
+                <ArrowBackIcon />
+             </IconButton>
+          </Box>
+          
+          <Avatar sx={{ m: 1, bgcolor: 'secondary.main', color: 'primary.main' }}>
+            <PersonAddOutlinedIcon />
+          </Avatar>
+          <Typography component="h1" variant="h5" sx={{ mb: 1, fontWeight: 700 }}>
+            Criar Conta
+          </Typography>
+          <Typography variant="body2" color="text.secondary" align="center" sx={{ mb: 3 }}>
+            Use seu e-mail acadêmico <b>@ufmg.br</b>
+          </Typography>
 
-      <form onSubmit={cadastrar} style={{ display: 'flex', flexDirection: 'column', width: '300px' }}>
-        <label>Nome:</label>
-        <input
-          type="text"
-          value={nome}
-          onChange={(e) => setNome(e.target.value)}
-          placeholder="Seu nome"
-          required
-          style={{ marginBottom: '10px', padding: '8px' }}
-        />
+          {mensagem.texto && (
+            <Alert severity={mensagem.tipo} sx={{ width: '100%', mb: 2 }}>
+              {mensagem.texto}
+            </Alert>
+          )}
 
-        <label>E-mail acadêmico:</label>
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="seu@ufmg.br"
-          required
-          style={{ marginBottom: '10px', padding: '8px' }}
-        />
-
-        <label>Senha:</label>
-        <input
-          type="password"
-          value={senha}
-          onChange={(e) => setSenha(e.target.value)}
-          placeholder="Escolha uma senha"
-          required
-          style={{ marginBottom: '20px', padding: '8px' }}
-        />
-
-        <button type="submit" style={{ padding: '10px', backgroundColor: '#00529b', color: 'white', border: 'none', cursor: 'pointer' }}>
-          Cadastrar
-        </button>
-      </form>
-
-      <button
-        type="button"
-        onClick={onVoltarLogin}
-        style={{ marginTop: '16px', padding: '8px 12px', cursor: 'pointer', background: 'transparent', border: '1px solid #00529b', color: '#00529b' }}
-      >
-        Voltar ao login
-      </button>
-
-      {mensagem && <p style={{ marginTop: '20px', fontWeight: 'bold' }}>{mensagem}</p>}
-    </div>
+          <Box component="form" onSubmit={cadastrar} noValidate sx={{ width: '100%' }}>
+            <TextField margin="normal" required fullWidth label="Nome Completo" value={nome} onChange={(e) => setNome(e.target.value)} />
+            <TextField margin="normal" required fullWidth label="E-mail Acadêmico" placeholder="exemplo@ufmg.br" value={email} onChange={(e) => setEmail(e.target.value)} />
+            <TextField margin="normal" required fullWidth label="Senha" type="password" value={senha} onChange={(e) => setSenha(e.target.value)} />
+            <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2, py: 1.5, fontSize: '1rem', fontWeight: 700 }}>
+              Finalizar Cadastro
+            </Button>
+            <Button fullWidth variant="text" onClick={onVoltarLogin}>
+              Já tenho conta? Entrar
+            </Button>
+          </Box>
+        </Paper>
+      </Box>
+    </Container>
   );
 }
 
