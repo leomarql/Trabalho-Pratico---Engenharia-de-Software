@@ -16,11 +16,53 @@ import ListaChats from './ListaChats';
 import Chat from './Chat';
 import Arquivados from './Arquivados';
 
+const STORAGE_USER = 'recoopere_usuario';
+const STORAGE_VIEW = 'recoopere_view';
+const STORAGE_ITEM = 'recoopere_itemId';
+const VIEWS_LOGADO = ['mural', 'perfil', 'meus-anuncios', 'item-detalhes', 'arquivados'];
+
+function readPersistedSession() {
+  try {
+    const rawUser = localStorage.getItem(STORAGE_USER);
+    if (!rawUser) {
+      return { user: null, view: 'home', itemId: null };
+    }
+    const user = JSON.parse(rawUser);
+    if (!user?.id) {
+      return { user: null, view: 'home', itemId: null };
+    }
+    let view = localStorage.getItem(STORAGE_VIEW) || 'mural';
+    if (!VIEWS_LOGADO.includes(view)) {
+      view = 'mural';
+    }
+    let itemId = null;
+    const rawItem = localStorage.getItem(STORAGE_ITEM);
+    if (rawItem) {
+      const n = parseInt(rawItem, 10);
+      if (Number.isFinite(n)) {
+        itemId = n;
+      }
+    }
+    if (view === 'item-detalhes' && itemId == null) {
+      view = 'mural';
+    }
+    return { user, view, itemId };
+  } catch {
+    return { user: null, view: 'home', itemId: null };
+  }
+}
+
 function App() {
-  const [usuarioLogado, setUsuarioLogado] = useState(null);
+  const [usuarioLogado, setUsuarioLogado] = useState(() => readPersistedSession().user);
   const [telaAuth, setTelaAuth] = useState(null);
-  const [view, setView] = useState('home');
-  const [itemSelecionadoId, setItemSelecionadoId] = useState(null);
+  const [view, setView] = useState(() => {
+    const s = readPersistedSession();
+    return s.user ? s.view : 'home';
+  });
+  const [itemSelecionadoId, setItemSelecionadoId] = useState(() => {
+    const s = readPersistedSession();
+    return s.user ? s.itemId : null;
+  });
   const [listaChatsAberta, setListaChatsAberta] = useState(false);
   const [chatAtivo, setChatAtivo] = useState(null);
   const [darkMode, setDarkMode] = useState(false);
@@ -28,6 +70,22 @@ function App() {
   useEffect(() => {
     document.title = "Recoopere | Achados e Perdidos";
   }, []);
+
+  useEffect(() => {
+    if (usuarioLogado) {
+      localStorage.setItem(STORAGE_USER, JSON.stringify(usuarioLogado));
+      localStorage.setItem(STORAGE_VIEW, view);
+      if (itemSelecionadoId != null) {
+        localStorage.setItem(STORAGE_ITEM, String(itemSelecionadoId));
+      } else {
+        localStorage.removeItem(STORAGE_ITEM);
+      }
+    } else {
+      localStorage.removeItem(STORAGE_USER);
+      localStorage.removeItem(STORAGE_VIEW);
+      localStorage.removeItem(STORAGE_ITEM);
+    }
+  }, [usuarioLogado, view, itemSelecionadoId]);
 
   // Definindo Tokens de Cores baseados nos arquivos fornecidos
   const lightColors = {
@@ -69,6 +127,7 @@ function App() {
     setUsuarioLogado(null);
     setTelaAuth(null);
     setView('home');
+    setItemSelecionadoId(null);
   };
 
   const abrirDetalhesItem = (id) => {
@@ -81,7 +140,14 @@ function App() {
       alert("Erro ao processar login.");
       return;
     }
-    setUsuarioLogado(dados);
+    const usuario = {
+      id: dados.id,
+      nome: dados.nome,
+      email: dados.email,
+      is_admin: dados.is_admin,
+      ...(dados.imagem_url ? { imagem_url: dados.imagem_url } : {}),
+    };
+    setUsuarioLogado(usuario);
     setTelaAuth(null);
     setView('mural');
   };

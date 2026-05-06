@@ -21,7 +21,8 @@ import {
   InputAdornment,
   MenuItem,
   CardActionArea,
-  Stack
+  Stack,
+  Avatar
 } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -208,11 +209,25 @@ function Mural({ usuario, onVerDetalhes }) {
                       {item.descricao}
                     </Typography>
                     
-                    <Box sx={{ mt: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Box sx={{ mt: 2, display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
                       <PanToolIcon sx={{ fontSize: 16, color: 'warning.main' }} />
                       <Typography variant="caption" sx={{ fontWeight: 700 }}>
                         {item.total_reivindicacoes} reivindicação(ões)
                       </Typography>
+                      {item.dono_nome && (
+                        <>
+                          <Typography variant="caption" color="text.secondary" sx={{ mx: 0.5 }}>·</Typography>
+                          <Avatar
+                            src={item.dono_imagem_url ? `http://127.0.0.1:8000/${item.dono_imagem_url}` : undefined}
+                            sx={{ width: 22, height: 22, fontSize: '0.65rem' }}
+                          >
+                            {!item.dono_imagem_url && item.dono_nome.charAt(0).toUpperCase()}
+                          </Avatar>
+                          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
+                            {item.dono_nome}
+                          </Typography>
+                        </>
+                      )}
                     </Box>
                   </CardContent>
                 </CardActionArea>

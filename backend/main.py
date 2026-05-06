@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Depends, HTTPException, status, File, UploadFile, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 import shutil
 import os
 from datetime import datetime
@@ -27,6 +27,39 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+def _serialize_item(item: models.Item, db: Session) -> dict:
+    reivs = []
+    for r in item.reivindicacoes:
+        u = r.usuario
+        reivs.append({
+            "id": r.id,
+            "item_id": r.item_id,
+            "usuario_id": r.usuario_id,
+            "data_reivindicacao": r.data_reivindicacao,
+            "usuario_nome": u.nome if u else None,
+            "usuario_imagem_url": u.imagem_url if u else None,
+        })
+    dono = item.dono if item.dono is not None else db.get(models.Usuario, item.dono_id)
+    base = {k: v for k, v in item.__dict__.items() if not k.startswith("_")}
+    return {
+        **base,
+        "total_reivindicacoes": len(item.reivindicacoes),
+        "reivindicacoes": reivs,
+        "dono_nome": dono.nome if dono else None,
+        "dono_imagem_url": dono.imagem_url if dono else None,
+    }
+
+
+def _serialize_mensagem(m: models.Mensagem) -> dict:
+    base = {k: v for k, v in m.__dict__.items() if not k.startswith("_")}
+    rem = m.remetente
+    return {
+        **base,
+        "remetente_nome": rem.nome if rem else None,
+        "remetente_imagem_url": rem.imagem_url if rem else None,
+    }
 
 @app.get("/")
 def read_root():
@@ -55,11 +88,12 @@ def login(usuario: schemas.UsuarioLogin, db: Session = Depends(get_db)):
         raise HTTPException(status_code=401, detail="E-mail ou senha incorretos.")
 
     return {
-        "mensagem": "Login realizado com sucesso!", 
+        "mensagem": "Login realizado com sucesso!",
         "nome": db_usuario.nome,
         "id": db_usuario.id,
         "email": db_usuario.email,
-        "is_admin": db_usuario.is_admin
+        "is_admin": db_usuario.is_admin,
+        "imagem_url": db_usuario.imagem_url,
     }
 
 @app.put("/usuarios/{usuario_id}", response_model=schemas.UsuarioResponse)
@@ -113,55 +147,50 @@ async def criar_item(
     db.add(novo_item)
     db.commit()
     db.refresh(novo_item)
-    return {**novo_item.__dict__, "total_reivindicacoes": 0, "reivindicacoes": []}
+    return _serialize_item(novo_item, db)
 
 @app.get("/itens", response_model=list[schemas.ItemResponse])
 def listar_itens(db: Session = Depends(get_db)):
-    itens = db.query(models.Item).filter(models.Item.status == "ativo").order_by(models.Item.id.desc()).all()
-    res = []
-    for item in itens:
-        reivs = []
-        for r in item.reivindicacoes:
-            reivs.append({
-                "id": r.id, "item_id": r.item_id, "usuario_id": r.usuario_id,
-                "data_reivindicacao": r.data_reivindicacao, "usuario_nome": r.usuario.nome
-            })
-        res.append({
-            **item.__dict__,
-            "total_reivindicacoes": len(item.reivindicacoes),
-            "reivindicacoes": reivs
-        })
-    return res
+    itens = (
+        db.query(models.Item)
+        .options(
+            joinedload(models.Item.dono),
+            joinedload(models.Item.reivindicacoes).joinedload(models.Reivindicacao.usuario),
+        )
+        .filter(models.Item.status == "ativo")
+        .order_by(models.Item.id.desc())
+        .all()
+    )
+    return [_serialize_item(item, db) for item in itens]
 
 @app.get("/itens-arquivados", response_model=list[schemas.ItemResponse])
 def listar_itens_arquivados(db: Session = Depends(get_db)):
-    itens = db.query(models.Item).filter(models.Item.status == "devolvido").order_by(models.Item.id.desc()).all()
-    res = []
-    for item in itens:
-        res.append({
-            **item.__dict__,
-            "total_reivindicacoes": len(item.reivindicacoes),
-            "reivindicacoes": []
-        })
-    return res
+    itens = (
+        db.query(models.Item)
+        .options(
+            joinedload(models.Item.dono),
+            joinedload(models.Item.reivindicacoes).joinedload(models.Reivindicacao.usuario),
+        )
+        .filter(models.Item.status == "devolvido")
+        .order_by(models.Item.id.desc())
+        .all()
+    )
+    return [_serialize_item(item, db) for item in itens]
 
 @app.get("/itens/{item_id}", response_model=schemas.ItemResponse)
 def obter_item(item_id: int, db: Session = Depends(get_db)):
-    item = db.query(models.Item).filter(models.Item.id == item_id).first()
+    item = (
+        db.query(models.Item)
+        .options(
+            joinedload(models.Item.dono),
+            joinedload(models.Item.reivindicacoes).joinedload(models.Reivindicacao.usuario),
+        )
+        .filter(models.Item.id == item_id)
+        .first()
+    )
     if not item:
         raise HTTPException(status_code=404, detail="Item não encontrado.")
-    
-    reivs = []
-    for r in item.reivindicacoes:
-        reivs.append({
-            "id": r.id, "item_id": r.item_id, "usuario_id": r.usuario_id,
-            "data_reivindicacao": r.data_reivindicacao, "usuario_nome": r.usuario.nome
-        })
-    return {
-        **item.__dict__,
-        "total_reivindicacoes": len(item.reivindicacoes),
-        "reivindicacoes": reivs
-    }
+    return _serialize_item(item, db)
 
 @app.patch("/itens/{item_id}/reivindicar", status_code=status.HTTP_200_OK)
 def reivindicar_item(item_id: int, usuario_id: int, db: Session = Depends(get_db)):
@@ -186,39 +215,65 @@ def enviar_mensagem(mensagem: schemas.MensagemCreate, remetente_id: int, db: Ses
     db.add(nova_msg)
     db.commit()
     db.refresh(nova_msg)
-    return {**nova_msg.__dict__, "remetente_nome": nova_msg.remetente.nome}
+    nova_msg = (
+        db.query(models.Mensagem)
+        .options(joinedload(models.Mensagem.remetente))
+        .filter(models.Mensagem.id == nova_msg.id)
+        .first()
+    )
+    return _serialize_mensagem(nova_msg)
 
 @app.get("/mensagens/{item_id}", response_model=list[schemas.MensagemResponse])
 def listar_mensagens(item_id: int, usuario_id: int, outro_id: int, db: Session = Depends(get_db)):
-    msgs = db.query(models.Mensagem).filter(
-        models.Mensagem.item_id == item_id,
-        (
-            (models.Mensagem.remetente_id == usuario_id) & (models.Mensagem.destinatario_id == outro_id) |
-            (models.Mensagem.remetente_id == outro_id) & (models.Mensagem.destinatario_id == usuario_id)
+    msgs = (
+        db.query(models.Mensagem)
+        .options(joinedload(models.Mensagem.remetente))
+        .filter(
+            models.Mensagem.item_id == item_id,
+            (
+                (models.Mensagem.remetente_id == usuario_id) & (models.Mensagem.destinatario_id == outro_id)
+                | (models.Mensagem.remetente_id == outro_id) & (models.Mensagem.destinatario_id == usuario_id)
+            ),
         )
-    ).order_by(models.Mensagem.data_envio.asc()).all()
-    
-    return [{**m.__dict__, "remetente_nome": m.remetente.nome} for m in msgs]
+        .order_by(models.Mensagem.data_envio.asc())
+        .all()
+    )
+
+    return [_serialize_mensagem(m) for m in msgs]
 
 @app.get("/meus-chats/{usuario_id}")
 def listar_meus_chats(usuario_id: int, db: Session = Depends(get_db)):
-    itens_anunciados = db.query(models.Item).filter(models.Item.dono_id == usuario_id).all()
+    itens_anunciados = (
+        db.query(models.Item)
+        .options(joinedload(models.Item.reivindicacoes).joinedload(models.Reivindicacao.usuario))
+        .filter(models.Item.dono_id == usuario_id)
+        .all()
+    )
     chats = []
     for item in itens_anunciados:
         for reiv in item.reivindicacoes:
+            u = reiv.usuario
             chats.append({
                 "item": item,
                 "outro_usuario_id": reiv.usuario_id,
-                "outro_usuario_nome": reiv.usuario.nome,
-                "tipo": "dono"
+                "outro_usuario_nome": u.nome if u else None,
+                "outro_usuario_imagem_url": u.imagem_url if u else None,
+                "tipo": "dono",
             })
-    reivindicacoes = db.query(models.Reivindicacao).filter(models.Reivindicacao.usuario_id == usuario_id).all()
+    reivindicacoes = (
+        db.query(models.Reivindicacao)
+        .options(joinedload(models.Reivindicacao.item).joinedload(models.Item.dono))
+        .filter(models.Reivindicacao.usuario_id == usuario_id)
+        .all()
+    )
     for reiv in reivindicacoes:
+        dono = reiv.item.dono if reiv.item.dono is not None else db.get(models.Usuario, reiv.item.dono_id)
         chats.append({
             "item": reiv.item,
             "outro_usuario_id": reiv.item.dono_id,
-            "outro_usuario_nome": db.query(models.Usuario).filter(models.Usuario.id == reiv.item.dono_id).first().nome,
-            "tipo": "reclamante"
+            "outro_usuario_nome": dono.nome if dono else None,
+            "outro_usuario_imagem_url": dono.imagem_url if dono else None,
+            "tipo": "reclamante",
         })
     return chats
 
@@ -291,17 +346,13 @@ def editar_item(
         item.imagem_url = caminho_imagem
 
     db.commit()
-    db.refresh(item)
-    
-    reivs = []
-    for r in item.reivindicacoes:
-        reivs.append({
-            "id": r.id, "item_id": r.item_id, "usuario_id": r.usuario_id,
-            "data_reivindicacao": r.data_reivindicacao, "usuario_nome": r.usuario.nome
-        })
-    
-    return {
-        **item.__dict__,
-        "total_reivindicacoes": len(item.reivindicacoes),
-        "reivindicacoes": reivs
-    }
+    item = (
+        db.query(models.Item)
+        .options(
+            joinedload(models.Item.dono),
+            joinedload(models.Item.reivindicacoes).joinedload(models.Reivindicacao.usuario),
+        )
+        .filter(models.Item.id == item_id)
+        .first()
+    )
+    return _serialize_item(item, db)

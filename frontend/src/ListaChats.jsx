@@ -46,8 +46,11 @@ function ListaChats({ usuario, onSelecionarChat }) {
                 sx={{ borderRadius: 2, mb: 1, '&:hover': { bgcolor: 'secondary.light' } }}
               >
                 <ListItemAvatar>
-                  <Avatar sx={{ bgcolor: chat.tipo === 'dono' ? 'primary.main' : 'secondary.main' }}>
-                    {chat.outro_usuario_nome.charAt(0).toUpperCase()}
+                  <Avatar
+                    src={chat.outro_usuario_imagem_url ? `http://127.0.0.1:8000/${chat.outro_usuario_imagem_url}` : undefined}
+                    sx={{ bgcolor: chat.tipo === 'dono' ? 'primary.main' : 'secondary.main' }}
+                  >
+                    {!chat.outro_usuario_imagem_url && chat.outro_usuario_nome.charAt(0).toUpperCase()}
                   </Avatar>
                 </ListItemAvatar>
                 <ListItemText

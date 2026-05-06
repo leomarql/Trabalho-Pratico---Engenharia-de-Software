@@ -80,47 +80,59 @@ function Home({ onComeçar }) {
           </Grid>
 
           {/* Carrossel Centralizado e mais largo */}
-          <Grid item xs={12} sx={{ width: '100%', maxWidth: 850, display: 'flex', justifyContent: 'center' }}>
-            <Box sx={{ width: '100%', minHeight: 400, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <Grid item xs={12} sx={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
+            <Box sx={{
+              width: '100%',
+              maxWidth: 850,
+              minHeight: 400,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              px: { xs: 2, sm: 0 }
+            }}>
               <Fade in={true} key={activeSlide} timeout={1000}>
-                <Paper 
-                  elevation={0} 
-                  sx={{ 
-                    p: 6, 
-                    borderRadius: 8, 
-                    bgcolor: 'background.paper', 
-                    textAlign: 'center',
-                    boxShadow: '0px 20px 40px rgba(0,0,0,0.05)',
-                    width: '100%',
-                    border: '1px solid',
-                    borderColor: 'divider'
-                  }}
-                >
-                  <Box sx={{ mb: 3 }}>
-                    {slides[activeSlide].icone}
-                  </Box>
-                  <Typography variant="h4" sx={{ fontWeight: 800, mb: 2, color: 'primary.main' }}>
-                    {slides[activeSlide].titulo}
-                  </Typography>
-                  <Typography variant="body1" color="text.secondary" sx={{ fontSize: '1.1rem' }}>
-                    {slides[activeSlide].descricao}
-                  </Typography>
-                  
-                  <Stack direction="row" spacing={1} justifyContent="center" sx={{ mt: 4 }}>
-                    {slides.map((_, index) => (
-                      <Box 
-                        key={index}
-                        sx={{ 
-                          width: index === activeSlide ? 24 : 8, 
-                          height: 8, 
-                          borderRadius: 4, 
-                          bgcolor: index === activeSlide ? 'secondary.main' : '#ddd',
-                          transition: 'width 0.3s'
-                        }} 
-                      />
-                    ))}
-                  </Stack>
-                </Paper>
+                <Box sx={{ width: '100%' }}>
+                  <Paper
+                    elevation={0}
+                    sx={{
+                      p: 6,
+                      borderRadius: 8,
+                      bgcolor: 'background.paper',
+                      textAlign: 'center',
+                      boxShadow: '0px 20px 40px rgba(0,0,0,0.05)',
+                      width: '100%',
+                      border: '1px solid',
+                      borderColor: 'divider'
+                    }}
+                  >
+                    <Box sx={{ mb: 3 }}>
+                      {slides[activeSlide].icone}
+                    </Box>
+                    <Typography variant="h4" sx={{ fontWeight: 800, mb: 2, color: 'primary.main' }}>
+                      {slides[activeSlide].titulo}
+                    </Typography>
+                    <Typography variant="body1" color="text.secondary" sx={{ fontSize: '1.1rem' }}>
+                      {slides[activeSlide].descricao}
+                    </Typography>
+
+                    <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center', mt: 4 }}>
+                      <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+                        {slides.map((_, index) => (
+                          <Box
+                            key={index}
+                            sx={{
+                              width: index === activeSlide ? 24 : 8,
+                              height: 8,
+                              borderRadius: 4,
+                              bgcolor: index === activeSlide ? 'secondary.main' : '#ddd',
+                              transition: 'width 0.3s'
+                            }}
+                          />
+                        ))}
+                      </Stack>
+                    </Box>
+                  </Paper>
+                </Box>
               </Fade>
             </Box>
           </Grid>

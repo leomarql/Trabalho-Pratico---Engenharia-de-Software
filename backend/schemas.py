@@ -51,7 +51,8 @@ class ReivindicacaoResponse(BaseModel):
     item_id: int
     usuario_id: int
     data_reivindicacao: datetime
-    usuario_nome: Optional[str] = None # Nome do reclamante para facilitar o front
+    usuario_nome: Optional[str] = None  # Nome do reclamante para facilitar o front
+    usuario_imagem_url: Optional[str] = None
 
     class Config:
         from_attributes = True
@@ -75,6 +76,8 @@ class ItemResponse(BaseModel):
     status: str
     imagem_url: Optional[str] = None
     dono_id: int
+    dono_nome: Optional[str] = None
+    dono_imagem_url: Optional[str] = None
     total_reivindicacoes: int = 0
     reivindicacoes: List[ReivindicacaoResponse] = []
 
@@ -95,6 +98,7 @@ class MensagemResponse(BaseModel):
     remetente_id: int
     destinatario_id: int
     remetente_nome: Optional[str] = None
+    remetente_imagem_url: Optional[str] = None
 
     class Config:
         from_attributes = True
