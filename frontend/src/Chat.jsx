@@ -82,37 +82,53 @@ function Chat({ item, usuario, destinatarioId, onVerItem }) {
       
       <Paper variant="outlined" sx={{ flexGrow: 1, p: 2, overflowY: 'auto', mb: 1, bgcolor: 'background.default', borderRadius: 0, border: 'none' }}>
         <Stack spacing={2}>
-          {mensagens.map((msg) => (
-            <Box 
-              key={msg.id} 
-              sx={{ 
-                alignSelf: msg.remetente_id === usuario.id ? 'flex-end' : 'flex-start',
-                maxWidth: '85%'
-              }}
-            >
-              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: msg.remetente_id === usuario.id ? 'flex-end' : 'flex-start' }}>
-                <Typography variant="caption" sx={{ mb: 0.5, px: 1, fontWeight: 600, color: 'text.secondary' }}>
-                  {msg.remetente_id === usuario.id ? "Você" : msg.remetente_nome}
-                </Typography>
-                <Paper 
-                  sx={{ 
-                    p: 1.5, 
-                    bgcolor: msg.remetente_id === usuario.id ? 'primary.main' : 'background.paper',
-                    color: (theme) => msg.remetente_id === usuario.id 
-                      ? theme.palette.getContrastText(theme.palette.primary.main) 
-                      : 'text.primary',
-                    borderRadius: msg.remetente_id === usuario.id ? '20px 20px 0 20px' : '20px 20px 20px 0',
-                    boxShadow: '0px 2px 5px rgba(0,0,0,0.05)'
-                  }}
+          {mensagens.map((msg) => {
+            const minhaMsg = msg.remetente_id === usuario.id;
+            const inicialFallback = minhaMsg
+              ? (usuario.nome?.charAt(0) || '?')
+              : (msg.remetente_nome?.charAt(0) || '?');
+            return (
+              <Box
+                key={msg.id}
+                sx={{
+                  alignSelf: minhaMsg ? 'flex-end' : 'flex-start',
+                  maxWidth: '90%',
+                  display: 'flex',
+                  flexDirection: minhaMsg ? 'row-reverse' : 'row',
+                  gap: 1,
+                  alignItems: 'flex-end',
+                }}
+              >
+                <Avatar
+                  src={msg.remetente_imagem_url ? `http://127.0.0.1:8000/${msg.remetente_imagem_url}` : undefined}
+                  sx={{ width: 32, height: 32, fontSize: '0.75rem', flexShrink: 0 }}
                 >
-                  <Typography variant="body2">{msg.conteudo}</Typography>
-                </Paper>
-                <Typography variant="caption" sx={{ fontSize: '9px', mt: 0.5, opacity: 0.7 }}>
-                  {new Date(msg.data_envio).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                </Typography>
+                  {!msg.remetente_imagem_url && inicialFallback.toUpperCase()}
+                </Avatar>
+                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: minhaMsg ? 'flex-end' : 'flex-start' }}>
+                  <Typography variant="caption" sx={{ mb: 0.5, px: 1, fontWeight: 600, color: 'text.secondary' }}>
+                    {minhaMsg ? 'Você' : msg.remetente_nome}
+                  </Typography>
+                  <Paper
+                    sx={{
+                      p: 1.5,
+                      bgcolor: minhaMsg ? 'primary.main' : 'background.paper',
+                      color: (theme) => minhaMsg
+                        ? theme.palette.getContrastText(theme.palette.primary.main)
+                        : 'text.primary',
+                      borderRadius: minhaMsg ? '20px 20px 0 20px' : '20px 20px 20px 0',
+                      boxShadow: '0px 2px 5px rgba(0,0,0,0.05)',
+                    }}
+                  >
+                    <Typography variant="body2">{msg.conteudo}</Typography>
+                  </Paper>
+                  <Typography variant="caption" sx={{ fontSize: '9px', mt: 0.5, opacity: 0.7 }}>
+                    {new Date(msg.data_envio).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </Typography>
+                </Box>
               </Box>
-            </Box>
-          ))}
+            );
+          })}
           <div ref={scrollRef} />
         </Stack>
       </Paper>

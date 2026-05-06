@@ -26,7 +26,8 @@ class Item(Base):
     imagem_url = Column(String, nullable=True)
     
     dono_id = Column(Integer, ForeignKey("usuarios.id"))
-    
+
+    dono = relationship("Usuario", foreign_keys=[dono_id])
     reivindicacoes = relationship("Reivindicacao", back_populates="item")
 
 class Reivindicacao(Base):

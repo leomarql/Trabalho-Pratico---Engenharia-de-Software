@@ -9,7 +9,8 @@ import {
   Chip, 
   Button, 
   Divider,
-  Stack
+  Stack,
+  Avatar
 } from '@mui/material';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import PanToolIcon from '@mui/icons-material/PanTool';
@@ -102,9 +103,23 @@ function ItemDetalhes({ itemId, usuario, onVoltar }) {
                 )}
               </Stack>
 
-              <Typography variant="body1" sx={{ mb: 4, color: 'text.secondary', lineHeight: 1.8 }}>
+              <Typography variant="body1" sx={{ mb: 3, color: 'text.secondary', lineHeight: 1.8 }}>
                 {item.descricao}
               </Typography>
+
+              {item.dono_nome && (
+                <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 3 }}>
+                  <Avatar
+                    src={item.dono_imagem_url ? `http://127.0.0.1:8000/${item.dono_imagem_url}` : undefined}
+                    sx={{ width: 40, height: 40, bgcolor: 'secondary.main' }}
+                  >
+                    {!item.dono_imagem_url && item.dono_nome.charAt(0).toUpperCase()}
+                  </Avatar>
+                  <Typography variant="body2" color="text.secondary">
+                    Anunciado por <strong>{item.dono_nome}</strong>
+                  </Typography>
+                </Stack>
+              )}
 
               <Divider sx={{ mb: 3 }} />
 

@@ -147,8 +147,11 @@ function MeusAnuncios({ usuario, onVerDetalhes }) {
                           }
                         >
                           <ListItemAvatar>
-                            <Avatar sx={{ width: 32, height: 32, fontSize: '0.8rem', bgcolor: 'secondary.main', color: 'primary.main' }}>
-                              {reiv.usuario_nome.charAt(0).toUpperCase()}
+                            <Avatar
+                              src={reiv.usuario_imagem_url ? `http://127.0.0.1:8000/${reiv.usuario_imagem_url}` : undefined}
+                              sx={{ width: 32, height: 32, fontSize: '0.8rem', bgcolor: 'secondary.main', color: 'primary.main' }}
+                            >
+                              {!reiv.usuario_imagem_url && reiv.usuario_nome.charAt(0).toUpperCase()}
                             </Avatar>
                           </ListItemAvatar>
                           <ListItemText 
