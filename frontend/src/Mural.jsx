@@ -174,53 +174,78 @@ function Mural({ usuario, onVerDetalhes }) {
           </Stack>
         </Paper>
 
-        {/* FORÇANDO 3 POR LINHA COM FLEX-BASIS 33.33% EM MD E SM */}
-        <Grid container spacing={3} columns={12}>
-          {itensFiltrados.map((item) => (
-            <Grid item key={item.id} xs={12} sm={4} md={4} sx={{ display: 'flex' }}>
-              <Card sx={{ 
-                width: '100% !important', 
-                display: 'flex', 
-                flexDirection: 'column',
-                borderRadius: 4,
-                boxShadow: '0px 4px 15px rgba(0,0,0,0.05)',
-                minWidth: '250px' // Garante que o card não encolha demais
-              }}>
-                <CardActionArea onClick={() => onVerDetalhes(item.id)} sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', alignItems: 'stretch' }}>
-                  <CardMedia
-                    component="img"
-                    height="200"
-                    image={item.imagem_url ? `http://127.0.0.1:8000/${item.imagem_url}` : 'https://via.placeholder.com/200'}
-                  />
-                  <CardContent sx={{ flexGrow: 1, p: 3 }}>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                      <Typography variant="h6" sx={{ fontWeight: '800' }}>{item.titulo}</Typography>
-                      <Chip label={item.categoria} size="small" color="primary" />
-                    </Box>
-                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>{item.local_encontrado}</Typography>
-                    <Typography variant="body2" color="text.secondary" sx={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                      {item.descricao}
-                    </Typography>
-                  </CardContent>
-                </CardActionArea>
+        <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+          <Grid container spacing={4} sx={{ width: '100%', maxWidth: '1200px' }}>
+            {itensFiltrados.map((item) => (
+              <Grid item key={item.id} xs={12} sm={6} md={4} sx={{ display: 'flex', justifyContent: 'center' }}>
+                <Card sx={{ 
+                  width: '350px', // LARGURA FIXA DOS CARDS
+                  minWidth: '300px',
+                  display: 'flex', 
+                  flexDirection: 'column',
+                  borderRadius: 4,
+                  boxShadow: '0px 4px 15px rgba(0,0,0,0.05)',
+                  overflow: 'hidden'
+                }}>
+                  <CardActionArea onClick={() => onVerDetalhes(item.id)} sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', alignItems: 'stretch' }}>
+                    <CardMedia
+                      component="img"
+                      height="220"
+                      image={item.imagem_url ? `http://127.0.0.1:8000/${item.imagem_url}` : 'https://via.placeholder.com/220'}
+                    />
+                    <CardContent sx={{ flexGrow: 1, p: 3 }}>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                        <Typography variant="h6" sx={{ fontWeight: '800' }}>{item.titulo}</Typography>
+                        <Chip label={item.categoria} size="small" color="primary" />
+                      </Box>
+                      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>{item.local_encontrado}</Typography>
+                      <Typography variant="body2" color="text.secondary" sx={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                        {item.descricao}
+                      </Typography>
+                    </CardContent>
+                  </CardActionArea>
 
-                <CardActions sx={{ p: 2, justifyContent: 'space-between' }}>
-                   <Box sx={{ display: 'flex', gap: 1 }}>
-                    {Number(usuario.id) !== Number(item.dono_id) && (
-                      <Button size="small" color="warning" variant="contained" onClick={() => reivindicarItem(item.id)} sx={{ fontWeight: 700 }}>É MEU!</Button>
-                    )}
-                    {Number(usuario.id) === Number(item.dono_id) && (
-                      <Button size="small" color="success" variant="contained" onClick={() => marcarDevolvido(item.id)} sx={{ fontWeight: 700 }}>Devolvido</Button>
-                    )}
-                  </Box>
-                  {(usuario.is_admin || Number(usuario.id) === Number(item.dono_id)) && (
-                    <IconButton color="error" size="small" onClick={() => deletarItem(item.id)}><DeleteIcon fontSize="small" /></IconButton>
-                  )}
-                </CardActions>
-              </Card>
-            </Grid>
-          ))}
-        </Grid>
+                  <CardActions sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 1 }}>
+                     <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
+                      {Number(usuario.id) !== Number(item.dono_id) && (
+                        <Button 
+                          fullWidth
+                          color="warning" 
+                          variant="contained" 
+                          onClick={() => reivindicarItem(item.id)} 
+                          sx={{ fontWeight: 700, borderRadius: 2 }}
+                        >
+                          É MEU!
+                        </Button>
+                      )}
+                      {Number(usuario.id) === Number(item.dono_id) && (
+                        <Button 
+                          fullWidth
+                          color="success" 
+                          variant="contained" 
+                          startIcon={<CheckCircleIcon />}
+                          onClick={() => marcarDevolvido(item.id)} 
+                          sx={{ fontWeight: 700, borderRadius: 2 }}
+                        >
+                          Devolvido
+                        </Button>
+                      )}
+                    </Box>
+                    
+                    <Box sx={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <Button size="small" onClick={() => onVerDetalhes(item.id)}>Ver detalhes</Button>
+                      {(usuario.is_admin || Number(usuario.id) === Number(item.dono_id)) && (
+                        <IconButton color="error" size="small" onClick={() => deletarItem(item.id)}>
+                          <DeleteIcon fontSize="small" />
+                        </IconButton>
+                      )}
+                    </Box>
+                  </CardActions>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
+        </Box>
       </Container>
 
       <Fab color="secondary" sx={{ position: 'fixed', bottom: 32, right: 32 }} onClick={() => setOpenDialog(true)}>
@@ -228,7 +253,7 @@ function Mural({ usuario, onVerDetalhes }) {
       </Fab>
 
       <Dialog open={openDialog} onClose={() => setOpenDialog(false)} fullWidth maxWidth="sm">
-        <DialogTitle sx={{ fontWeight: '800' }}>📢 Novo Anúncio</DialogTitle>
+        <DialogTitle sx={{ fontWeight: '800', color: 'primary.main' }}>📢 Novo Anúncio</DialogTitle>
         <DialogContent><CadastroItem usuario={usuario} onSucesso={() => { carregarItens(); setOpenDialog(false); }} /></DialogContent>
       </Dialog>
     </Box>
