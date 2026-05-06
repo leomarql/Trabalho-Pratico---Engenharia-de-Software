@@ -19,6 +19,7 @@ import Arquivados from './Arquivados';
 const STORAGE_USER = 'recoopere_usuario';
 const STORAGE_VIEW = 'recoopere_view';
 const STORAGE_ITEM = 'recoopere_itemId';
+const STORAGE_THEME = 'recoopere_darkMode';
 const VIEWS_LOGADO = ['mural', 'perfil', 'meus-anuncios', 'item-detalhes', 'arquivados'];
 
 function readPersistedSession() {
@@ -65,12 +66,18 @@ function App() {
   });
   const [listaChatsAberta, setListaChatsAberta] = useState(false);
   const [chatAtivo, setChatAtivo] = useState(null);
-  const [darkMode, setDarkMode] = useState(false);
+  
+  // PERSISTÊNCIA DO TEMA: Lê do localStorage ao iniciar
+  const [darkMode, setDarkMode] = useState(() => {
+    const saved = localStorage.getItem(STORAGE_THEME);
+    return saved === 'true';
+  });
 
   useEffect(() => {
     document.title = "Recoopere | Achados e Perdidos";
   }, []);
 
+  // Sincroniza a sessão no localStorage
   useEffect(() => {
     if (usuarioLogado) {
       localStorage.setItem(STORAGE_USER, JSON.stringify(usuarioLogado));
@@ -87,7 +94,11 @@ function App() {
     }
   }, [usuarioLogado, view, itemSelecionadoId]);
 
-  // Definindo Tokens de Cores baseados nos arquivos fornecidos
+  // Sincroniza o tema no localStorage sempre que mudar
+  useEffect(() => {
+    localStorage.setItem(STORAGE_THEME, String(darkMode));
+  }, [darkMode]);
+
   const lightColors = {
     primary: '#005ac1',
     onPrimary: '#ffffff',
@@ -109,7 +120,6 @@ function App() {
         main: darkMode ? darkColors.primary : lightColors.primary,
         contrastText: darkMode ? darkColors.onPrimary : lightColors.onPrimary,
       },
-      // Passando os tokens como propriedades customizadas para usar no sx
       tokens: darkMode ? darkColors : lightColors,
       background: {
         default: darkMode ? '#1b1b1f' : '#fefbff',
@@ -127,7 +137,7 @@ function App() {
     setUsuarioLogado(null);
     setTelaAuth(null);
     setView('home');
-    setItemSelecionadoId(null);
+    localStorage.clear(); // Limpa tudo ao sair
   };
 
   const abrirDetalhesItem = (id) => {
@@ -140,14 +150,7 @@ function App() {
       alert("Erro ao processar login.");
       return;
     }
-    const usuario = {
-      id: dados.id,
-      nome: dados.nome,
-      email: dados.email,
-      is_admin: dados.is_admin,
-      ...(dados.imagem_url ? { imagem_url: dados.imagem_url } : {}),
-    };
-    setUsuarioLogado(usuario);
+    setUsuarioLogado(dados);
     setTelaAuth(null);
     setView('mural');
   };
