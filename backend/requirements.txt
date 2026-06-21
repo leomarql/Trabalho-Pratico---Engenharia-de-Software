@@ -2,10 +2,9 @@ fastapi
 sqlalchemy
 python-multipart
 uvicorn
-bcrypt
-pydantic
-
-# Dependências de teste
 pytest
 pytest-cov
 httpx
+passlib[bcrypt]
+bcrypt==4.0.1
+pydantic
