@@ -228,14 +228,14 @@ class TestAtualizarFotoPerfil:
         usuario_id = usuario_criado["id"]
         assert usuario_criado["imagem_url"] is None  # estava vazio antes
 
-        client.patch(
+        resposta = client.patch(
             f"/usuarios/{usuario_id}/foto",
             files=self._make_fake_image("avatar.png"),
         )
-
-        # Verifica via login que o campo foi persistido
-        login_resp = client.post("/login", json={
-            "email": usuario_criado["email"],
-            "senha": "senha_secreta",  # mesma do usuario_payload
-        })
-        assert login_resp.json()["imagem_url"] is not None
+        assert resposta.status_code == 200
+        
+        # O PATCH já retorna o usuário atualizado com a nova imagem_url
+        data = resposta.json()
+        assert "imagem_url" in data
+        assert data["imagem_url"] is not None
+        assert "avatar.png" in data["imagem_url"]
