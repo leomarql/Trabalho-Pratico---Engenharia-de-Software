@@ -115,10 +115,10 @@ function Login({ onLoginSucesso, onIrParaCadastro }) {
               sx={{ 
                 py: 1.5, 
                 fontWeight: 800, 
-                bgcolor: (theme) => theme.palette.tokens.primaryContainer, 
-                color: (theme) => theme.palette.tokens.onPrimaryContainer,
+                bgcolor: (theme) => theme.palette.tokens?.primaryContainer || '#d8e2ff', 
+                color: (theme) => theme.palette.tokens?.onPrimaryContainer || '#001a41',
                 boxShadow: 'none',
-                '&:hover': { bgcolor: (theme) => theme.palette.tokens.primaryContainer, filter: 'brightness(0.9)' }
+                '&:hover': { bgcolor: (theme) => theme.palette.tokens?.primaryContainer || '#d8e2ff', filter: 'brightness(0.9)' }
               }}
             >
               Criar nova conta

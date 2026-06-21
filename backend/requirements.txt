@@ -2,5 +2,10 @@ fastapi
 sqlalchemy
 python-multipart
 uvicorn
-passlib[bcrypt]
+bcrypt
 pydantic
+
+# Dependências de teste
+pytest
+pytest-cov
+httpx
