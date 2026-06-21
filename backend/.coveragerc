@@ -1,0 +1,10 @@
+[run]
+source = .
+omit =
+    .venv/*
+    tests/*
+    */site-packages/*
+
+[report]
+exclude_lines =
+    pragma: no cover

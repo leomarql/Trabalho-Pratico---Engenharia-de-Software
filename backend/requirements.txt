@@ -3,4 +3,8 @@ sqlalchemy
 python-multipart
 uvicorn
 passlib[bcrypt]
+bcrypt==4.0.1
 pydantic
+pytest
+pytest-cov
+httpx
