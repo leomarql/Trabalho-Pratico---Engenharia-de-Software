@@ -45,7 +45,18 @@ test('reivindicar um item e conversar pelo chat', async ({ page }) => {
   // Abre a lista de conversas (Fab primário de chat) e seleciona a conversa
   await page.locator('.MuiFab-primary').click();
   await expect(page.getByText(/chat - minhas conversas/i)).toBeVisible();
-  await page.getByText(tituloItem).first().click();
+  
+  // FECHAR QUALQUER DIALOGO QUE POSSA ESTAR ABERTO ANTES DE CLICAR
+  const closeButton = page.getByRole('button', { name: /fechar/i });
+  if (await closeButton.isVisible()) {
+    await closeButton.click();
+    // Aguarda o dialog fechar completamente e dá um tempo extra para a animação
+    await expect(closeButton).not.toBeVisible();
+    await page.waitForTimeout(500); 
+  }
+
+  // Clica no item na lista chat, sendo mais específico: procura o texto dentro de um item de lista
+  await page.locator('li').filter({ hasText: tituloItem }).click({ timeout: 10000 });
 
   // Envia uma mensagem no chat
   const campo = page.getByPlaceholder(/escreva uma mensagem/i);

@@ -38,7 +38,7 @@ export async function logar(page, { email, senha }) {
   }
   await page.getByLabel(/e-mail acadêmico/i).fill(email);
   await page.getByLabel(/senha/i).fill(senha);
-  await page.getByRole('button', { name: /^entrar$/i }).click();
+  await page.getByRole('main').getByRole('button', { name: /^entrar$/i }).click();
 
   // Após login, a view vira "mural"
   await expect(page.getByRole('heading', { name: /mural de achados e perdidos/i })).toBeVisible();
