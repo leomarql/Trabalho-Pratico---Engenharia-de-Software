@@ -1,16 +1,21 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-// https://vite.dev/config/
 export default defineConfig({
   plugins: [react({ jsxRuntime: 'automatic' })],
   test: {
-    // Simula um ambiente de navegador (window, document, etc.)
     environment: 'jsdom',
-    // Carrega os matchers do jest-dom antes de cada teste
     setupFiles: ['./src/setupTests.js'],
     globals: true,
     testTimeout: 10000,
+    // Vitest cuida apenas dos testes de unidade/integração em src/.
+    // Os testes E2E (Playwright) ficam em tests/ e são rodados por `npm run test:e2e`.
+    include: ['src/**/*.{test,spec}.{js,jsx}'],
+    server: {
+      deps: {
+        inline: [/@mui\//, /react-transition-group/],
+      },
+    },
     coverage: {
       provider: 'v8',
       reporter: ['text', 'lcov'],
@@ -18,4 +23,3 @@ export default defineConfig({
     },
   },
 })
-
