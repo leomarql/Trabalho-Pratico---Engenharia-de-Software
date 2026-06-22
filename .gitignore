@@ -62,3 +62,4 @@ env.bak/
 ehthumbs.db
 Thumbs.db
 *.dbEXPLICAÇÃO_SISTEMA.md
+.pytest_cache/
